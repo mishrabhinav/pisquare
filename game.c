@@ -92,20 +92,22 @@ void game_init(game_state_t *state)
 	state->boxes_count = 0;
 
 	/* player */
-	player_t *player = player_new();
+	for (int i = 0; i < state->player_count; i++) {
+		player_t *player = player_new();
 
-	player->entity->pos = (vector2_t){256, 256};
-	player->angular_vel = 0;
-	player->color = (color_t){0, 255, 0, 255};
-	player->right_pin = RPI_GPIO2;
-	player->left_pin = RPI_GPIO3;
+		player->entity->pos = get_pos(i+1);
+		player->angular_vel = 0;
+		player->color = get_colour(i + 1);
+		player->right_pin = get_right_pin(i + 1);
+		player->left_pin = get_left_pin(i + 1);
 
-	RPI_SetGpioInput(player->right_pin);
-	RPI_SetGpioInput(player->left_pin);
+		RPI_SetGpioInput(player->right_pin);
+		RPI_SetGpioInput(player->left_pin);
 
-	RPI_GetGpio()->GPPUD = 2;
+		RPI_GetGpio()->GPPUD = 2;
 
-	state->player = player;
+		state->player[i] = *player;
+	}
 
 	/* timers */
 	state->timer_box = 0;
@@ -126,23 +128,25 @@ void game_update(game_state_t *state)
 		state->timer_frame = 0;
 	}
 
-	if ((int)state->player->entity->pos.x <= 0 ||
-		(int)state->player->entity->pos.y <= 0 ||
-		(int)(state->player->entity->pos.x
-		       + state->player->entity->size.x) >= 511 ||
-		(int)(state->player->entity->pos.y
-		       + state->player->entity->size.x) >= 481)
-		state->player->speed = 0;
+	for (int i = 0; i < state->player_count; i++) {
+		if ((int)state->player[i].entity->pos.x <= 0 ||
+			(int)state->player[i].entity->pos.y <= 0 ||
+			(int)(state->player[i].entity->pos.x
+			       + state->player[i].entity->size.x) >= 511 ||
+			(int)(state->player[i].entity->pos.y
+			       + state->player[i].entity->size.x) >= 481)
+			state->player[i].speed = 0;
 
-	/* IO */
-	if (RPI_GetGpioValue(state->player->right_pin) == 0) {
-		state->player->speed = 50;
-		state->player->angular_vel = 270;
-	} else if (RPI_GetGpioValue(state->player->left_pin) == 0) {
-		state->player->speed = 50;
-		state->player->angular_vel = -270;
-	} else
-		state->player->angular_vel = 0;
+		/* IO */
+		if (RPI_GetGpioValue(state->player[i].right_pin) == 0) {
+			state->player[i].speed = 50;
+			state->player[i].angular_vel = 270;
+		} else if (RPI_GetGpioValue(state->player[i].left_pin) == 0) {
+			state->player[i].speed = 50;
+			state->player[i].angular_vel = -270;
+		} else
+			state->player[i].angular_vel = 0;
+	}
 
 
 	/* Boxes */
@@ -157,10 +161,11 @@ void game_update(game_state_t *state)
 		move_box(state, &state->boxes[i]);
 
 	/* Player */
-	move_player(state, state->player);
+	for (int i = 0; i <= state->player_count; i++)
+		move_player(state, &state->player[i]);
 
 	/* Detect collisions */
-	for (int i = 0; i < state->boxes_count; i++) {
+	for (int i = 0; i <= state->boxes_count; i++) {
 		box_t box = state->boxes[i];
 		(void)box;
 	}
@@ -178,7 +183,8 @@ void game_draw(game_state_t *state)
 
 
 	/* player */
-	draw_player(state, state->player);
+	for (int i = 0; i < state->player_count; i++)
+		draw_player(state, &state->player[i]);
 
 	/* UI */
 	print_time(state);

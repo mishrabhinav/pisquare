@@ -19,6 +19,7 @@
 #define SCREEN_WIDTH    512
 #define SCREEN_HEIGHT   512
 #define SCREEN_DEPTH    32      /* 16 or 32-bit */
+#define MAX_PLAYERS 4
 
 static game_state_t state;
 
@@ -74,6 +75,8 @@ void kernel_main(unsigned int r0, unsigned int r1, unsigned int atags)
 	state.device = graphics_create(SCREEN_WIDTH,
 				       SCREEN_HEIGHT,
 				       SCREEN_DEPTH);
+
+	state.player = calloc(MAX_PLAYERS, sizeof(player_t));
 	state.player_count = 0;
 
 	draw_splash(&state);
@@ -125,6 +128,8 @@ void kernel_main(unsigned int r0, unsigned int r1, unsigned int atags)
 
 		graphics_flush(state.device);
 	}
+
+	state.player_count++;
 
 	game_init(&state);
 
