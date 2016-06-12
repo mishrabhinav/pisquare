@@ -135,6 +135,7 @@ void game_update(game_state_t *state)
 	state->timer_game += state->delta;
 	state->timer_frame += state->delta;
 
+	/* Detect collisions */
 	for (int j = 0; j < state->player_count; j++) {
 		for (int i = 0; i < state->boxes_count; i++) {
 			if (state->player[j].lives > 0)
@@ -189,9 +190,6 @@ void game_update(game_state_t *state)
 			move_player(state, &state->player[i]);
 	}
 
-	/* Detect collisions */
-
-
 }
 
 void game_draw(game_state_t *state)
@@ -226,4 +224,21 @@ void game_free(game_state_t *state)
 
 	free(state->boxes);
 	free(state->player);
+}
+
+void game_over(game_state_t *state)
+{
+
+	char str[16];
+
+	draw_background(state);
+	print_text(state, "GAME OVER", (vector2_t){165, 181});
+
+	if (state->player_count == 1) {
+		sprintf(str, "TIME: %.1f", state->timer_game);
+		print_text(state, str, (vector2_t){165, 231});
+	} else {
+		print_text(state, "PLAYER : WON", (vector2_t){165, 231});
+	}
+
 }

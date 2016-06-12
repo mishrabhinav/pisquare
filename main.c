@@ -83,6 +83,8 @@ void kernel_main(unsigned int r0, unsigned int r1, unsigned int atags)
 
 	RPI_WaitMicroSeconds(800000);
 
+start:
+
 	RPI_SetGpioInput(PLAYER_1_RIGHT);
 	RPI_GetGpio()->GPPUD = 2;
 	RPI_SetGpioInput(PLAYER_1_LEFT);
@@ -134,6 +136,7 @@ void kernel_main(unsigned int r0, unsigned int r1, unsigned int atags)
 	game_init(&state);
 
 	uint32_t diff, new;
+	int alive = state.player_count;
 
 	float secondsElapsed;
 
@@ -158,7 +161,23 @@ void kernel_main(unsigned int r0, unsigned int r1, unsigned int atags)
 		/*write full frame*/
 		graphics_flush(state.device);
 
+		for (int i = 0; i < state.player_count; i++)
+			if (state.player[i].lives == 0)
+				alive--;
+
+		if (!alive)
+			break;
 		/* check game state transition conditions */
 		/* perform transition */
 	}
+
+	RPI_WaitMicroSeconds(500000);
+	game_over(&state);
+	print_text(&state, "PRESS R TO RESTART", (vector2_t){76, 484});
+	graphics_flush(state.device);
+	while (RPI_GetGpioValue(PLAYER_1_RIGHT) != 0)
+		;
+
+	goto start;
+
 }
