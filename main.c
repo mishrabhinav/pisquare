@@ -90,85 +90,66 @@ start:
 	RPI_SetGpioInput(PLAYER_1_LEFT);
 	RPI_GetGpio()->GPPUD = 2;
 
-	while (RPI_GetGpioValue(PLAYER_1_RIGHT) != 0) {
-		draw_background(&state);
-		print_text(&state, "MENU",
-				(vector2_t){221, 161});
-		print_text(&state, "L : SELECT    R : START",
-				(vector2_t){36, 484});
+	/* menu */
+	draw_background(&state);
+	print_text(&state, "MENU",
+			(vector2_t){221, 161});
+	print_text(&state, "L : SELECT    R : START",
+			(vector2_t){36, 484});
 
-		print_text(&state, "1 PLAYER", (vector2_t){181, 201});
-		print_text(&state, "2 PLAYER", (vector2_t){181, 231});
-		print_text(&state, "3 PLAYER", (vector2_t){181, 261});
-		print_text(&state, "4 PLAYER", (vector2_t){181, 291});
+	char player_num[8];
+
+	while (RPI_GetGpioValue(PLAYER_1_RIGHT) != 0) {
 
 		if (RPI_GetGpioValue(PLAYER_1_LEFT) == 0)
-			state.player_count = (state.player_count + 1) % 4;
+			state.player_count = (state.player_count) % 4 + 1;
 
-		switch (state.player_count + 1) {
-		case 1:
-			print_text_color(&state, "1 PLAYER",
-					(vector2_t){181, 201},
-					(color_t){0, 255, 0, 255});
-			break;
-		case 2:
-			print_text_color(&state, "2 PLAYER",
-					(vector2_t){181, 231},
-					(color_t){0, 255, 0, 255});
-			break;
-		case 3:
-			print_text_color(&state, "3 PLAYER",
-					(vector2_t){181, 261},
-					(color_t){0, 255, 0, 255});
-			break;
-		case 4:
-			print_text_color(&state, "4 PLAYER",
-					(vector2_t){181, 291},
-					(color_t){0, 255, 0, 255});
-			break;
+		for (int i = 0; i < 4; i++) {
+			sprintf(player_num, "%d PLAYER", i+1);
+			print_text(&state, player_num,
+					(vector2_t){181, 201 + 30 * i});
 		}
+
+		sprintf(player_num, "%d PLAYER", state.player_count + 1);
+		print_text_color(&state, player_num,
+			(vector2_t){181, 201 + 30 * state.player_count},
+			(color_t){0, 255, 0, 255});
 
 		graphics_flush(state.device);
 	}
 
-	state.player_count++;
-
+	/* initialize round */
 	game_init(&state);
 
-	uint32_t diff, new;
 	int alive = state.player_count;
-
-	float secondsElapsed;
 
 	rpi_sys_timer_t *timer = RPI_GetSystemTimer();
 	uint32_t prev = timer->counter_lo;
+	uint32_t new;
 
-	RPI_SetGpioInput(RPI_GPIO18);
-
+	/* main loop */
 	while (1) {
 		/* time delta */
 		new = timer->counter_lo;
-		diff = new - prev;
+		state.delta = (float)(new - prev)/1000000;
 		prev = new;
-		secondsElapsed = (float)diff/1000000;
-
-		state.delta = secondsElapsed;
 
 		/* update */
 		game_update(&state);
+
 		/* draw */
 		game_draw(&state);
+
 		/*write full frame*/
 		graphics_flush(state.device);
 
+		/* check game state transition conditions */
 		for (int i = 0; i < state.player_count; i++)
 			if (state.player[i].lives == 0)
 				alive--;
 
 		if (!alive)
 			break;
-		/* check game state transition conditions */
-		/* perform transition */
 	}
 
 	RPI_WaitMicroSeconds(500000);
@@ -179,5 +160,4 @@ start:
 		;
 
 	goto start;
-
 }
