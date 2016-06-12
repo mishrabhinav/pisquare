@@ -42,6 +42,20 @@ static void add_box(game_state_t *state)
 	state->boxes[state->boxes_count-1] = *box;
 }
 
+static int will_collide(player_t *player, box_t *box)
+{
+	if (player->entity->pos.x < box->entity->pos.x + box->entity->size.x &&
+		player->entity->pos.x + player->entity->size.x >
+						box->entity->pos.x &&
+		player->entity->pos.y <
+				box->entity->pos.y + box->entity->size.y &&
+		player->entity->pos.y + player->entity->size.y >
+						box->entity->pos.y)
+		return 1;
+
+	return 0;
+}
+
 static void print_time(game_state_t *state)
 {
 	char str[10];
@@ -56,7 +70,7 @@ static void print_lives(game_state_t *state)
 {
 	char str[10];
 
-	sprintf(str, "LIVES %d", state->player->lives);
+	sprintf(str, "HEALTH %d", state->player->lives);
 	print_text_color(state, str, (vector2_t){0, 486},
 			 (color_t){ .r = 255, .g = 0, .b = 0, .a = 255});
 }
@@ -65,11 +79,13 @@ static void print_io(game_state_t *state)
 {
 	char str[2];
 
-	str[0] = RPI_GetGpioValue(state->player->right_pin) > 0 ? '1' : '0';
-	str[1] = RPI_GetGpioValue(state->player->left_pin) > 0 ? '1' : '0';
+	str[0] = RPI_GetGpioValue(state->player[0].right_pin) > 0 ? '1' : '0';
+	str[1] = RPI_GetGpioValue(state->player[0].left_pin) > 0 ? '1' : '0';
 	str[2] = 0;
 
-	print_text(state, str, (vector2_t){200, 486});
+	(void) str;
+
+	/* print_text(state, str, (vector2_t){200, 486}); */
 }
 
 static void print_fps(game_state_t *state)
@@ -104,8 +120,6 @@ void game_init(game_state_t *state)
 		RPI_SetGpioInput(player->right_pin);
 		RPI_SetGpioInput(player->left_pin);
 
-		RPI_GetGpio()->GPPUD = 2;
-
 		state->player[i] = *player;
 	}
 
@@ -120,6 +134,15 @@ void game_update(game_state_t *state)
 	state->timer_box += state->delta;
 	state->timer_game += state->delta;
 	state->timer_frame += state->delta;
+
+	for (int j = 0; j < state->player_count; j++) {
+		for (int i = 0; i < state->boxes_count; i++) {
+			if (state->player[j].lives > 0)
+				if (will_collide(&state->player[j],
+							&state->boxes[i]))
+					state->player[j].lives--;
+		}
+	}
 
 	/* Diagnostics */
 	if (state->timer_frame >= 1.f) {
@@ -161,14 +184,13 @@ void game_update(game_state_t *state)
 		move_box(state, &state->boxes[i]);
 
 	/* Player */
-	for (int i = 0; i <= state->player_count; i++)
-		move_player(state, &state->player[i]);
+	for (int i = 0; i < state->player_count; i++) {
+		if (state->player[i].lives > 0)
+			move_player(state, &state->player[i]);
+	}
 
 	/* Detect collisions */
-	for (int i = 0; i <= state->boxes_count; i++) {
-		box_t box = state->boxes[i];
-		(void)box;
-	}
+
 
 }
 
