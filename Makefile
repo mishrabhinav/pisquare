@@ -15,7 +15,7 @@ INCLUDES = -I libarmc
 DEPSINFO = -MD -MP
 OPTIMIZE = -O0 -DDEBUG
 ifeq ($(BUILD),release)
-OPTIMIZE = -O2 -D_FORTIFY_SOURCE=2 -pipe -fomit-frame-pointer
+OPTIMIZE = -O0 -DNDEBUG
 endif
 ASFLAGS  = $(RPI1)
 CFLAGS   = $(RPI1) $(CSTD) $(WARNINGS) $(ERRORS) $(DEFINES) $(INCLUDES) $(DEPSINFO) $(OPTIMIZE)

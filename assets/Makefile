@@ -6,7 +6,11 @@ CC       = arm-none-eabi-gcc
 OBJCOPY  = arm-none-eabi-objcopy
 RPI1     = -mfpu=vfp -mfloat-abi=hard -march=armv6zk -mtune=arm1176jzf-s \
            -nostartfiles
-CFLAGS   = $(RPI1)
+OPTIMIZE = -O0 -DDEBUG
+ifeq ($(BUILD),release)
+OPTIMIZE = -O2 -DNDEBUG
+endif
+CFLAGS   = $(RPI1) $(OPTIMIZE)
 
 MAKEHEADERS = makeheaders
 IMGS = $(wildcard *.png) $(wildcard font/*.png)
