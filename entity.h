@@ -13,7 +13,7 @@ typedef struct {
 
 entity_t *entity_new(void);
 void entity_free(entity_t *ent);
-rect_t *entity_rect(rect_t *rect, entity_t *ent);
-bool entity_test_collision(entity_t *a, entity_t *b);
+rect_t *entity_rect(rect_t *rect, const entity_t *ent);
+bool entity_test_collision(const entity_t *a, const entity_t *b);
 
 #endif
