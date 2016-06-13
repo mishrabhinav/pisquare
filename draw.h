@@ -23,4 +23,7 @@ void draw_box(const game_state_t *state, const box_t *box);
 /* Players */
 void draw_player(const game_state_t *state, const player_t *player);
 
+void draw_square(const game_state_t *state, vector2_t *pos, float width,
+					float degrees, const color_t *color);
+
 #endif
