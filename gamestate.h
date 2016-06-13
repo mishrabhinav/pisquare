@@ -5,7 +5,7 @@
 #include "player.h"
 #include "box.h"
 
-typedef struct {
+typedef struct game_state {
 	graphics_t *device;
 
 	vector2_t area;
@@ -22,9 +22,21 @@ typedef struct {
 	int fps;
 
 	/* Timers */
+	float time;
 	float timer_frame;
 	float timer_box;
 	float timer_game;
 } game_state_t;
+
+typedef struct scene {
+	/* Functions */
+	void (*init)(game_state_t *state);
+	int (*update)(game_state_t *state);
+	void (*draw)(game_state_t *state);
+	void (*free)(game_state_t *state);
+
+	/* Transition */
+	struct scene *next_scene;
+} scene_t;
 
 #endif

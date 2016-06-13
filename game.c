@@ -8,8 +8,20 @@
 #include "text.h"
 #include "box.h"
 #include "player.h"
-#include "move.h"
+#include "update.h"
 #include "draw.h"
+
+scene_t *game_scene(void)
+{
+	scene_t *s = malloc(sizeof(scene_t));
+
+	s->init = &game_init;
+	s->update = &game_update;
+	s->draw = &game_draw;
+	s->free = &game_free;
+
+	return s;
+}
 
 static void add_box(game_state_t *state)
 {
@@ -141,76 +153,12 @@ void game_init(game_state_t *state)
 	state->timer_game = 0;
 }
 
-void game_menu(game_state_t *state)
-{
-	char player_num[8];
-
-	state->player_count = 1;
-
-	while (RPI_GetGpioValue(PLAYER_1_RIGHT) != 0) {
-		draw_background(state);
-		print_text(state, "MENU",
-				&(vector2_t){221, 161});
-		print_text(state, "L : SELECT    R : START",
-				&(vector2_t){36, 484});
-
-		if (RPI_GetGpioValue(PLAYER_1_LEFT) == 0)
-			state->player_count = (state->player_count) % 4 + 1;
-
-		for (int i = 0; i < 4; i++) {
-			sprintf(player_num, "%d PLAYER", i + 1);
-			print_text(state, player_num,
-					&(vector2_t){181, 201 + 30 * i});
-		}
-
-		sprintf(player_num, "%d PLAYER", state->player_count);
-		print_text_color(state, player_num,
-			&(vector2_t){181, 201 + 30 * (state->player_count - 1)},
-			&(color_t){0, 255, 0, 255});
-
-		graphics_flush(state->device);
-	}
-}
-
-void game_players(game_state_t *state)
-{
-	char str[2];
-
-	draw_background(state);
-	print_text(state, "PLAYER COLOURS", &(vector2_t){116, 150});
-
-	for (int i = 0; i < state->player_count; i++) {
-		sprintf(str, "%i", i + 1);
-		print_text(state, str, &(vector2_t){116, 160 + (i + 1) * 30});
-
-		rect_t rect = {(vector2_t){156, 160 + (i + 1) * 30},
-						(vector2_t){20, 20} };
-
-		draw_rect(state, &rect, &state->player[i].color);
-	}
-
-	print_text(state, "PRESS L TO START", &(vector2_t){66, 484});
-
-	graphics_flush(state->device);
-
-}
-
-void game_update(game_state_t *state)
+int game_update(game_state_t *state)
 {
 	/* Timers */
 	state->timer_box += state->delta;
 	state->timer_game += state->delta;
 	state->timer_frame += state->delta;
-
-	/* Detect collisions */
-	for (int j = 0; j < state->player_count; j++) {
-		for (int i = 0; i < state->boxes_count; i++) {
-			if (state->player[j].lives > 0)
-				if (will_collide(&state->player[j],
-							&state->boxes[i]))
-					state->player[j].lives--;
-		}
-	}
 
 	/* Diagnostics */
 	if (state->timer_frame >= 1.f) {
@@ -219,26 +167,19 @@ void game_update(game_state_t *state)
 		state->timer_frame = 0;
 	}
 
-	for (int i = 0; i < state->player_count; i++) {
-		if ((int)state->player[i].entity->pos.x <= 0 ||
-			(int)state->player[i].entity->pos.y <= 0 ||
-			(int)(state->player[i].entity->pos.x
-			       + state->player[i].entity->size.x) >= 511 ||
-			(int)(state->player[i].entity->pos.y
-			       + state->player[i].entity->size.x) >= 481)
-			state->player[i].speed = 0;
+	/* Players */
+	for (int i = 0; i < state->player_count; i++)
+		update_player(state, &state->player[i]);
 
-		/* IO */
-		if (RPI_GetGpioValue(state->player[i].right_pin) == 0) {
-			state->player[i].speed = 50;
-			state->player[i].angular_vel = 270;
-		} else if (RPI_GetGpioValue(state->player[i].left_pin) == 0) {
-			state->player[i].speed = 50;
-			state->player[i].angular_vel = -270;
-		} else
-			state->player[i].angular_vel = 0;
+	/* Collision Detection */
+	for (int j = 0; j < state->player_count; j++) {
+		for (int i = 0; i < state->boxes_count; i++) {
+			if (state->player[j].lives > 0)
+				if (will_collide(&state->player[j],
+							&state->boxes[i]))
+					state->player[j].lives--;
+		}
 	}
-
 
 	/* Boxes */
 	/* Increase number of boxes over time */
@@ -249,14 +190,20 @@ void game_update(game_state_t *state)
 	}
 	/* Move Boxes */
 	for (int i = 0; i < state->boxes_count; i++)
-		move_box(state, &state->boxes[i]);
+		update_box(state, &state->boxes[i]);
 
 	/* Player */
 	for (int i = 0; i < state->player_count; i++) {
 		if (state->player[i].lives > 0)
-			move_player(state, &state->player[i]);
+			update_player(state, &state->player[i]);
 	}
+	int alive = state->player_count;
 
+	for (int i = 0; i < state->player_count; i++)
+		if (state->player[i].lives <= 0)
+			alive--;
+
+	return !!(state->player_count - 1) ? alive > 1 : alive > 0;
 }
 
 void game_draw(game_state_t *state)
@@ -292,25 +239,4 @@ void game_free(game_state_t *state)
 
 	free(state->boxes);
 	free(state->player);
-}
-
-void game_over(game_state_t *state)
-{
-
-	char str[16];
-
-	draw_background(state);
-	print_text(state, "GAME OVER", &(vector2_t){165, 181});
-
-	if (state->player_count == 1) {
-		sprintf(str, "TIME: %.1f", state->timer_game);
-		print_text(state, str, &(vector2_t){165, 231});
-	} else {
-		for (int i = 0; i < state->player_count; i++)
-			if (state->player[i].lives > 0)
-				sprintf(str, "PLAYER %i WON", i + 1);
-
-		print_text(state, str, &(vector2_t){136, 231});
-	}
-
 }

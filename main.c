@@ -9,7 +9,12 @@
 #include "rpi-mailbox-interface.h"
 #include "rpi-systimer.h"
 
+#include "splash.h"
+#include "menu.h"
+#include "menu_players.h"
 #include "game.h"
+#include "game_over.h"
+
 #include "text.h"
 #include "renderer.h"
 #include "dma.h"
@@ -22,6 +27,17 @@
 #define MAX_PLAYERS	4
 
 static game_state_t state;
+static scene_t *scene, *splash, *menu, *menu_players, *game, *game_over;
+
+static void goto_scene(scene_t *next)
+{
+	/*if (next && next->free)
+	*	next->free(&state);
+	*/
+	scene = next;
+	scene->init(&state);
+	state.time = 0;
+}
 
 void kernel_main(unsigned int r0, unsigned int r1, unsigned int atags)
 {
@@ -78,8 +94,6 @@ void kernel_main(unsigned int r0, unsigned int r1, unsigned int atags)
 
 	state.player = calloc(MAX_PLAYERS + 1, sizeof(player_t));
 
-	draw_splash(&state);
-
 	/* set main controller */
 	RPI_WaitMicroSeconds(1500000);
 
@@ -88,66 +102,61 @@ void kernel_main(unsigned int r0, unsigned int r1, unsigned int atags)
 	RPI_SetGpioInput(PLAYER_1_LEFT);
 	RPI_GetGpio()->GPPUD = 2;
 
-menu:
-	/* show menu */
-	game_menu(&state);
+	/* prepare scenes */
+	splash = splash_scene();
+	menu = menu_scene();
+	menu_players = menu_players_scene();
+	game = game_scene();
+	game_over = game_over_scene();
 
-	/* initialize round */
-	game_init(&state);
+	splash->next_scene = menu;
+	menu->next_scene = menu_players;
+	menu_players->next_scene = game;
+	game->next_scene = game_over;
+	game_over->next_scene = menu;
 
-	/* show players */
-	game_players(&state);
+	/* start at splash */
+	goto_scene(splash);
 
-	while (RPI_GetGpioValue(PLAYER_1_LEFT) != 0)
-		;
-
-	int alive;
-
+	/* configure time tracking */
 	rpi_sys_timer_t *timer = RPI_GetSystemTimer();
 	uint32_t prev = timer->counter_lo;
 	uint32_t new;
+	uint8_t proceed;
 
 	/* main loop */
 	while (1) {
-		alive = state.player_count;
-
 		/* time delta */
 		new = timer->counter_lo;
 		state.delta = (float)(new - prev)/1000000;
 		prev = new;
+		state.time += state.delta;
 
 		/* update */
-		game_update(&state);
+		proceed = scene->update(&state);
 
 		/* draw */
-		game_draw(&state);
+		scene->draw(&state);
 
 		/* write full frame */
 		graphics_flush(state.device);
 
-		/* check for alive players */
-		for (int i = 0; i < state.player_count; i++)
-			if (state.player[i].lives == 0)
-				alive--;
+		/* perform scene transitions */
+		if (!proceed)
+			goto_scene(scene->next_scene);
 
-		if ((state.player_count == 1 && !alive) ||
-			(state.player_count > 1 && alive == 1))
-			break;
+		/* check for alive players */
+		/*for (int i = 0; i < state.player_count; i++)
+		*	if (state.player[i].lives == 0)
+		*		alive--;
+
+		*if ((state.player_count == 1 && !alive) ||
+		*	(state.player_count > 1 && alive == 1))
+		*	break;
+		*/
 	}
 
-	RPI_WaitMicroSeconds(500000);
-	game_over(&state);
-	print_text(&state, "PRESS RL TO RESTART", &(vector2_t){66, 484});
-	graphics_flush(state.device);
-
-	while (RPI_GetGpioValue(PLAYER_1_RIGHT) != 0)
-		;
-
-	while (RPI_GetGpioValue(PLAYER_1_LEFT) != 0)
-		;
 
 	draw_background(&state);
 	graphics_flush(state.device);
-
-	goto menu;
 }

@@ -1,18 +1,10 @@
-#include "move.h"
+#include "update.h"
 
 #include <math.h>
 
 #include "random.h"
 
-static double mod(double x, double y)
-{
-	if (x > 0)
-		return x > y ? x - y : x;
-	else
-		return x < y ? x + 2 * y : x + y;
-}
-
-void move_entity(game_state_t *state, entity_t *ent)
+void update_entity(game_state_t *state, entity_t *ent)
 {
 	float delta = state->delta;
 
@@ -20,8 +12,7 @@ void move_entity(game_state_t *state, entity_t *ent)
 	ent->pos.y += delta * ent->vel.y;
 }
 
-
-void move_box(game_state_t *state, box_t *box)
+void update_box(game_state_t *state, box_t *box)
 {
 	entity_t *entity = box->entity;
 
@@ -48,20 +39,34 @@ void move_box(game_state_t *state, box_t *box)
 						+ entity->size.x/2;
 	}
 
-	move_entity(state, entity);
+	update_entity(state, entity);
 }
 
-void move_player(game_state_t *state, player_t *player)
+void update_player(game_state_t *state, player_t *player)
 {
-	player->dir = mod(player->dir + player->angular_vel * state->delta,
+	player->dir = fmodf(player->dir + player->angular_vel * state->delta,
 									360);
 	player->entity->vel.x = player->speed * cos(M_PI * player->dir/180.f);
 	player->entity->vel.y = player->speed * sin(M_PI * player->dir/180.f);
 
-	move_entity(state, player->entity);
-}
+	update_entity(state, player->entity);
 
-void move_sprite(game_state_t *state, sprite_t *sprt)
-{
-	move_entity(state, sprt->entity);
+	/* Boundaries */
+	if ((int)player->entity->pos.x <= 0 ||
+		(int)player->entity->pos.y <= 0 ||
+		(int)(player->entity->pos.x
+		       + player->entity->size.x) >= 511 ||
+		(int)(player->entity->pos.y
+		       + player->entity->size.x) >= 481)
+		player->speed = 0;
+
+	/* IO */
+	if (RPI_GetGpioValue(player->right_pin) == 0) {
+		player->speed = 50;
+		player->angular_vel = 270;
+	} else if (RPI_GetGpioValue(player->left_pin) == 0) {
+		player->speed = 50;
+		player->angular_vel = -270;
+	} else
+		player->angular_vel = 0;
 }
