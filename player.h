@@ -1,9 +1,10 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
+#include "rpi-gpio.h"
+
 #include "entity.h"
 #include "color.h"
-#include "libarmc/rpi-gpio.h"
 #include "bullet.h"
 #include "powerup.h"
 #include "renderer.h"

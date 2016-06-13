@@ -1,8 +1,10 @@
 #include "game.h"
 
 #include <stdio.h>
-#include "libarmc/rpi-gpio.h"
+
+#include "rpi-gpio.h"
 #include "rpi-random.h"
+
 #include "renderer.h"
 #include "random.h"
 #include "text.h"
