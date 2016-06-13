@@ -59,7 +59,7 @@ static void add_box(game_state_t *state)
 	state->boxes[state->boxes_count-1] = *box;
 }
 
-static int will_collide(player_t *player, box_t *box)
+static int collides(player_t *player, box_t *box)
 {
 	if (player->entity->pos.x < box->entity->pos.x + box->entity->size.x &&
 		player->entity->pos.x + player->entity->size.x >
@@ -85,29 +85,16 @@ static void print_time(game_state_t *state)
 
 static void print_lives(game_state_t *state)
 {
-	char str[10];
+	char str[8];
 
-	print_text_color(state, "HP", &(vector2_t){0, 486},
-			 &(color_t){ .r = 255, .g = 0, .b = 0, .a = 255});
+	print_text_color(state, "LIVES:", &(vector2_t){0, 486},
+			 &(color_t){255, 255, 255, 255});
 
 	for (int i = 0; i < state->player_count; i++) {
 		sprintf(str, "%d", state->player[i].lives);
-		print_text_color(state, str, &(vector2_t){50 + i * (65), 486},
+		print_text_color(state, str, &(vector2_t){120 + i * 30, 486},
 				&state->player[i].color);
 	}
-}
-
-static void print_io(game_state_t *state)
-{
-	char str[3];
-
-	str[0] = RPI_GetGpioValue(state->player[0].right_pin) > 0 ? '1' : '0';
-	str[1] = RPI_GetGpioValue(state->player[0].left_pin) > 0 ? '1' : '0';
-	str[2] = 0;
-
-	(void) str;
-
-	/* print_text(state, str, (vector2_t){200, 486}); */
 }
 
 static void print_fps(game_state_t *state)
@@ -115,7 +102,7 @@ static void print_fps(game_state_t *state)
 	char str[2];
 
 	sprintf(str, "%d", state->fps);
-	print_text_color(state, str, &(vector2_t){250, 486},
+	print_text_color(state, str, &(vector2_t){320, 486},
 			 &(color_t){0, 255, 0, 255});
 }
 
@@ -174,10 +161,14 @@ int game_update(game_state_t *state)
 	/* Collision Detection */
 	for (int j = 0; j < state->player_count; j++) {
 		for (int i = 0; i < state->boxes_count; i++) {
-			if (state->player[j].lives > 0)
-				if (will_collide(&state->player[j],
-							&state->boxes[i]))
+			if (state->player[j].lives > 0
+					&& state->player[j].debounce_time
+							> PLAYER_DEBOUNCE_TIME)
+				if (collides(&state->player[j],
+							&state->boxes[i])) {
 					state->player[j].lives--;
+					state->player[j].debounce_time = 0;
+				}
 		}
 	}
 
@@ -223,7 +214,6 @@ void game_draw(game_state_t *state)
 	/* UI */
 	print_time(state);
 	print_lives(state);
-	print_io(state);
 	print_fps(state);
 
 	/* Diagnostics */

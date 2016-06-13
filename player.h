@@ -5,9 +5,10 @@
 #include "color.h"
 #include "libarmc/rpi-gpio.h"
 
-#define PLAYER_LIVES 100
+#define PLAYER_LIVES 5
 #define PLAYER_DIRECTION 90
-#define PLAYER_SPEED 70
+#define PLAYER_SPEED 50
+#define PLAYER_DEBOUNCE_TIME 1.5f
 
 #define PLAYER_1_RIGHT RPI_GPIO4
 #define PLAYER_1_LEFT RPI_GPIO7
@@ -35,6 +36,7 @@ typedef struct {
 	float speed;
 	float angular_vel;
 	int lives;
+	float debounce_time;
 	color_t color;
 	rpi_gpio_pin_t left_pin;
 	rpi_gpio_pin_t right_pin;

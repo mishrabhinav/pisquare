@@ -55,10 +55,12 @@ void draw_box(const game_state_t *state, const box_t *box)
 
 void draw_player(const game_state_t *state, const player_t *player)
 {
-	rect_t rect;
-
-	draw_rect(state, entity_rect(&rect, player->entity), &player->color);
-
+	if (player->debounce_time > PLAYER_DEBOUNCE_TIME)
+		graphics_draw_rectangle(state->device, &player->color,
+				&player->entity->pos, &player->entity->size);
+	else
+		graphics_draw_rectangle_outline(state->device, &player->color,
+				&player->entity->pos, &player->entity->size);
 	/* generate vertices */
 	/*cvertex_t vs[3];
 	*float s = sinf((float)M_PI * player->dir/180.f);

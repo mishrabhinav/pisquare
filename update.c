@@ -44,6 +44,7 @@ void update_box(game_state_t *state, box_t *box)
 
 void update_player(game_state_t *state, player_t *player)
 {
+	player->debounce_time += state->delta;
 	player->dir = fmodf(player->dir + player->angular_vel * state->delta,
 									360);
 	player->entity->vel.x = player->speed * cos(M_PI * player->dir/180.f);

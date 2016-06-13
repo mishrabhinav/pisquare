@@ -19,12 +19,10 @@ scene_t *menu_players_scene(void)
 void menu_players_init(game_state_t *state)
 {
 	(void)state;
-	/* anything to do here? */
 }
 
 int menu_players_update(game_state_t *state)
 {
-	(void)state;
 	return state->time < 2.0f;
 }
 
@@ -45,6 +43,4 @@ void menu_players_draw(game_state_t *state)
 
 		draw_rect(state, &rect, &state->player[i].color);
 	}
-
-	print_text(state, "PRESS L TO START", &(vector2_t){66, 484});
 }
