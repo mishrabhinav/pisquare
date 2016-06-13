@@ -65,19 +65,19 @@ vector2_t get_pos(int player)
 	}
 }
 
-color_t get_colour(int player)
+color_t get_color(int player)
 {
 	switch (player) {
 	case 1:
-		return PLAYER_1_COLOUR;
+		return PLAYER_1_COLOR;
 	case 2:
-		return PLAYER_2_COLOUR;
+		return PLAYER_2_COLOR;
 	case 3:
-		return PLAYER_3_COLOUR;
+		return PLAYER_3_COLOR;
 	case 4:
-		return PLAYER_4_COLOUR;
+		return PLAYER_4_COLOR;
 	default:
-		return PLAYER_1_COLOUR;
+		return PLAYER_1_COLOR;
 	}
 }
 

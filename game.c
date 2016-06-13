@@ -122,7 +122,7 @@ void game_init(game_state_t *state)
 
 		player->entity->pos = get_pos(i+1);
 		player->angular_vel = 0;
-		player->color = get_colour(i + 1);
+		player->color = get_color(i + 1);
 		player->right_pin = get_right_pin(i + 1);
 		player->left_pin = get_left_pin(i + 1);
 

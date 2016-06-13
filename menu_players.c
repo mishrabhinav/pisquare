@@ -32,7 +32,7 @@ void menu_players_draw(game_state_t *state)
 
 	char str[2];
 
-	print_text(state, "PLAYER COLOURS", &(vector2_t){116, 150});
+	print_text(state, "PLAYER COLORS", &(vector2_t){116, 150});
 
 	for (int i = 0; i < state->player_count; i++) {
 		sprintf(str, "%i", i + 1);
@@ -41,6 +41,8 @@ void menu_players_draw(game_state_t *state)
 		rect_t rect = {(vector2_t){156, 160 + (i + 1) * 30},
 						(vector2_t){20, 20} };
 
-		draw_rect(state, &rect, &state->player[i].color);
+		color_t col = get_color(i + 1);
+
+		draw_rect(state, &rect, &col);
 	}
 }
