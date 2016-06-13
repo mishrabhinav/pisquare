@@ -4,7 +4,7 @@
 
 #include "assets/assets.h"
 
-void draw_splash(game_state_t *state)
+void draw_splash(const game_state_t *state)
 {
 	graphics_draw_image(state->device, &(vector2_t){0, 0},
 			    splash_bin, NULL);
@@ -29,28 +29,29 @@ void draw_splash(game_state_t *state)
 	graphics_flush(state->device);
 }
 
-void draw_background(game_state_t *state)
+void draw_background(const game_state_t *state)
 {
 	graphics_draw_image(state->device, &(vector2_t){0, 0},
 			    background_bin, NULL);
 }
 
-void draw_rect(game_state_t *state, rect_t *rect, color_t col)
+void draw_rect(const game_state_t *state, const rect_t *rect,
+	       const color_t *col)
 {
-	graphics_draw_rectangle(state->device, &col, &rect->origin,
-								&rect->size);
+	graphics_draw_rectangle(state->device, col,
+				&rect->origin, &rect->size);
 }
 
-void draw_box(game_state_t *state, box_t *box)
+void draw_box(const game_state_t *state, const box_t *box)
 {
 	rect_t rect;
 
-	draw_rect(state, entity_rect(&rect, box->entity), box->color);
+	draw_rect(state, entity_rect(&rect, box->entity), &box->color);
 }
 
-void draw_player(game_state_t *state, player_t *player)
+void draw_player(const game_state_t *state, const player_t *player)
 {
 	rect_t rect;
 
-	draw_rect(state, entity_rect(&rect, player->entity), player->color);
+	draw_rect(state, entity_rect(&rect, player->entity), &player->color);
 }
