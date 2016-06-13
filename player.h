@@ -5,7 +5,7 @@
 #include "color.h"
 #include "libarmc/rpi-gpio.h"
 
-#define PLAYER_LIVES 1
+#define PLAYER_LIVES 100
 #define PLAYER_DIRECTION 90
 #define PLAYER_SPEED 70
 

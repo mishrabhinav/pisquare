@@ -75,9 +75,14 @@ static void print_lives(game_state_t *state)
 {
 	char str[10];
 
-	sprintf(str, "HEALTH %d", state->player->lives);
-	print_text_color(state, str, &(vector2_t){0, 486},
+	print_text_color(state, "HP", &(vector2_t){0, 486},
 			 &(color_t){ .r = 255, .g = 0, .b = 0, .a = 255});
+
+	for (int i = 0; i < state->player_count; i++) {
+		sprintf(str, "%d", state->player[i].lives);
+		print_text_color(state, str, &(vector2_t){50 + i * (65), 486},
+				&state->player[i].color);
+	}
 }
 
 static void print_io(game_state_t *state)
@@ -167,6 +172,29 @@ void game_menu(game_state_t *state)
 	}
 }
 
+void game_players(game_state_t *state)
+{
+	char str[2];
+
+	draw_background(state);
+	print_text(state, "PLAYER COLOURS", &(vector2_t){116, 150});
+
+	for (int i = 0; i < state->player_count; i++) {
+		sprintf(str, "%i", i + 1);
+		print_text(state, str, &(vector2_t){116, 160 + (i + 1) * 30});
+
+		rect_t rect = {(vector2_t){156, 160 + (i + 1) * 30},
+						(vector2_t){20, 20} };
+
+		draw_rect(state, &rect, &state->player[i].color);
+	}
+
+	print_text(state, "PRESS L TO START", &(vector2_t){66, 484});
+
+	graphics_flush(state->device);
+
+}
+
 void game_update(game_state_t *state)
 {
 	/* Timers */
@@ -254,6 +282,7 @@ void game_draw(game_state_t *state)
 	/* Diagnostics */
 	state->frames_count += 1;
 }
+
 
 void game_free(game_state_t *state)
 {

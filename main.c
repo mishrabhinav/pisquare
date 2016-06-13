@@ -95,6 +95,12 @@ menu:
 	/* initialize round */
 	game_init(&state);
 
+	/* show players */
+	game_players(&state);
+
+	while (RPI_GetGpioValue(PLAYER_1_LEFT) != 0)
+		;
+
 	int alive;
 
 	rpi_sys_timer_t *timer = RPI_GetSystemTimer();
