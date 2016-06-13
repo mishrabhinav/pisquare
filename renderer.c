@@ -392,11 +392,13 @@ void graphics_draw_image(const graphics_t *device, const vector2_t *pos,
 		for (x = 0; x < width; x++) {
 			p = get_pixel(device, pos->x + x, pos->y + y);
 
-			imgpos = 8 + (y * width * 4) + (x * 4);
-			if (image[imgpos + 3] == 0)
+			imgpos = 8 + (y * width * (device->bpp >> 3)) +
+				     (x * (device->bpp >> 3));
+
+			if (device->bpp == 32 && image[imgpos + 3] == 0)
 				continue;
 
-			if (!tint)
+			if (!tint || device->bpp != 32)
 				src = (void *)(&image[imgpos]);
 			else
 				src = tint;
