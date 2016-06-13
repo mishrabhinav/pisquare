@@ -36,18 +36,17 @@ void move_box(game_state_t *state, box_t *box)
 						-entity->size.y)
 						+ entity->size.y/2;
 	}
-	/*if (entity->pos.y > state->area.y) {
-	*	entity->pos.y = -entity->size.y;
-	*	entity->pos.x = random_int(state->area.x
-	*					-entity->size.x)
-	*					+ entity->size.x/2;
-	*} else if (entity->pos.y + entity->size.y < 0) {
-	*	entity->pos.y = state->area.y;
-	*	entity->pos.x = random_int(state->area.x
-	*					-entity->size.x)
-	*					+ entity->size.x/2;
-	*}
-	*/
+	if (entity->pos.y > state->area.y) {
+		entity->pos.y = -entity->size.y;
+		entity->pos.x = random_int(state->area.x
+						-entity->size.x)
+						+ entity->size.x/2;
+	} else if (entity->pos.y + entity->size.y < 0) {
+		entity->pos.y = state->area.y;
+		entity->pos.x = random_int(state->area.x
+						-entity->size.x)
+						+ entity->size.x/2;
+	}
 
 	move_entity(state, entity);
 }

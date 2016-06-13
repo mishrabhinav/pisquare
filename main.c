@@ -17,7 +17,7 @@
 #include "player.h"
 
 #define SCREEN_WIDTH    512
-#define SCREEN_HEIGHT   512
+#define SCREEN_HEIGHT	512
 #define SCREEN_DEPTH    32      /* 16 or 32-bit */
 #define MAX_PLAYERS	4
 
@@ -88,8 +88,8 @@ void kernel_main(unsigned int r0, unsigned int r1, unsigned int atags)
 
 menu:
 	state.player_count = 1;
-		/* menu */
-		char player_num[8];
+	/* menu */
+	char player_num[8];
 
 	while (RPI_GetGpioValue(PLAYER_1_RIGHT) != 0) {
 		draw_background(&state);

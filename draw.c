@@ -43,9 +43,8 @@ void draw_rect(game_state_t *state, rect_t *rect, color_t col)
 
 void draw_box(game_state_t *state, box_t *box)
 {
-	rect_t rect;
-
-	draw_rect(state, entity_rect(&rect, box->entity), box->color);
+	graphics_draw_rectangle_outline(state->device, &box->color,
+					&box->entity->pos, &box->entity->size);
 }
 
 void draw_player(game_state_t *state, player_t *player)

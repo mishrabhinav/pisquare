@@ -66,17 +66,18 @@ void graphics_blank(const graphics_t *device)
 	dma_zero(device->mem, get_buf_size(device));
 }
 
-static color_t overrun;
+/* static color_t overrun; */
 static color_t *get_pixel(const graphics_t *device, size_t x, size_t y)
 {
-	size_t bpos;
+	/* size_t bpos; */
 
-	if (x >= device->width || y >= device->height)
-		return &overrun;
+	/*if (x >= device->width || y >= device->height)
+	*	return &overrun;
+	*/
+	/*bpos = y * device->pitch + x * (device->bpp >> 3);*/
 
-	bpos = y * device->pitch + x * (device->bpp >> 3);
-
-	return (void *)(&device->mem[bpos]);
+	return
+	(void *)(&device->mem[y * device->pitch + x * (device->bpp >> 3)]);
 }
 
 static void draw_line(const graphics_t *device,
@@ -243,6 +244,41 @@ void graphics_draw(const graphics_t *device,
 	}
 }
 
+void graphics_draw_rectangle_outline(const graphics_t *device,
+	const color_t *color, const vector2_t *pos, const vector2_t *hw)
+{
+	size_t dx, dy;
+	color_t *p;
+
+	/* horizontal */
+	for (dx = 0; dx < hw->x; dx++) {
+		p = get_pixel(device, pos->x + dx, pos->y);
+		p->b = color->b;
+		p->g = color->g;
+		p->r = color->r;
+		p->a = color->a;
+		p = get_pixel(device, pos->x + dx, pos->y + hw->y - 1);
+		p->b = color->b;
+		p->g = color->g;
+		p->r = color->r;
+		p->a = color->a;
+	}
+
+	/* vertical */
+	for (dy = 1; dy < hw->y - 1; dy++) {
+		p = get_pixel(device, pos->x, pos->y + dy);
+		p->b = color->b;
+		p->g = color->g;
+		p->r = color->r;
+		p->a = color->a;
+		p = get_pixel(device, pos->x + hw->x - 1, pos->y + dy);
+		p->b = color->b;
+		p->g = color->g;
+		p->r = color->r;
+		p->a = color->a;
+	}
+}
+
 void graphics_draw_rectangle(const graphics_t *device, const color_t *color,
 			     const vector2_t *pos, const vector2_t *hw)
 {
@@ -255,8 +291,7 @@ void graphics_draw_rectangle(const graphics_t *device, const color_t *color,
 			p->b = color->b;
 			p->g = color->g;
 			p->r = color->r;
-			if (device->bpp == 32)
-				p->a = color->a;
+			p->a = color->a;
 		}
 	}
 }
