@@ -87,7 +87,7 @@ static int collides(entity_t *e1, entity_t *e2)
 static void print_time(game_state_t *state)
 {
 	char str[10];
-	int len = sprintf(str, "%.1f", state->timer_game);
+	int len = sprintf(str, "%.1f", (double)state->timer_game);
 
 	int x = state->device->width - len * 20;
 

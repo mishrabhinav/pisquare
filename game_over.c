@@ -49,7 +49,7 @@ void game_over_draw(game_state_t *state)
 	char str[16];
 
 	if (state->player_count == 1) {
-		sprintf(str, "TIME: %.1f", state->timer_game);
+		sprintf(str, "TIME: %.1f", (double)state->timer_game);
 		print_text(state, str, &(vector2_t){145, 231});
 	} else {
 		for (int i = 0; i < state->player_count; i++)

@@ -8,7 +8,8 @@ CSTD     = -std=c99
 WARNINGS = -Wall -Wextra -Wformat=2 -pedantic \
            -Wfloat-equal -Wundef -Wcast-align \
            -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations \
-           -Wstrict-overflow=5 -Wwrite-strings
+           -Wstrict-overflow=5 -Wwrite-strings \
+           -Wdouble-promotion
 ERRORS   = -Werror -pedantic-errors -Wno-error=unused-result -Wno-error=cast-align
 DEFINES  = -D_DEFAULT_SOURCE
 INCLUDES = -I libarmc
