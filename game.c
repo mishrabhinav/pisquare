@@ -136,6 +136,37 @@ void game_init(game_state_t *state)
 	state->timer_game = 0;
 }
 
+void game_menu(game_state_t *state)
+{
+	char player_num[8];
+
+	state->player_count = 1;
+
+	while (RPI_GetGpioValue(PLAYER_1_RIGHT) != 0) {
+		draw_background(state);
+		print_text(state, "MENU",
+				(vector2_t){221, 161});
+		print_text(state, "L : SELECT    R : START",
+				(vector2_t){36, 484});
+
+		if (RPI_GetGpioValue(PLAYER_1_LEFT) == 0)
+			state->player_count = (state->player_count) % 4 + 1;
+
+		for (int i = 0; i < 4; i++) {
+			sprintf(player_num, "%d PLAYER", i + 1);
+			print_text(state, player_num,
+					(vector2_t){181, 201 + 30 * i});
+		}
+
+		sprintf(player_num, "%d PLAYER", state->player_count);
+		print_text_color(state, player_num,
+			(vector2_t){181, 201 + 30 * (state->player_count - 1)},
+			(color_t){0, 255, 0, 255});
+
+		graphics_flush(state->device);
+	}
+}
+
 void game_update(game_state_t *state)
 {
 	/* Timers */
@@ -246,7 +277,11 @@ void game_over(game_state_t *state)
 		sprintf(str, "TIME: %.1f", state->timer_game);
 		print_text(state, str, (vector2_t){165, 231});
 	} else {
-		print_text(state, "PLAYER : WON", (vector2_t){165, 231});
+		for (int i = 0; i < state->player_count; i++)
+			if (state->player[i].lives > 0)
+				sprintf(str, "PLAYER %i WON", i + 1);
+
+		print_text(state, str, (vector2_t){136, 231});
 	}
 
 }

@@ -81,44 +81,21 @@ void kernel_main(unsigned int r0, unsigned int r1, unsigned int atags)
 	draw_splash(&state);
 
 	RPI_WaitMicroSeconds(800000);
+
+	/* set main controller */
 	RPI_SetGpioInput(PLAYER_1_RIGHT);
 	RPI_GetGpio()->GPPUD = 2;
 	RPI_SetGpioInput(PLAYER_1_LEFT);
 	RPI_GetGpio()->GPPUD = 2;
 
 menu:
-	state.player_count = 1;
-	/* menu */
-	char player_num[8];
-
-	while (RPI_GetGpioValue(PLAYER_1_RIGHT) != 0) {
-		draw_background(&state);
-		print_text(&state, "MENU",
-				(vector2_t){221, 161});
-		print_text(&state, "L : SELECT    R : START",
-				(vector2_t){36, 484});
-
-		if (RPI_GetGpioValue(PLAYER_1_LEFT) == 0)
-			state.player_count = (state.player_count) % 4 + 1;
-
-		for (int i = 0; i < 4; i++) {
-			sprintf(player_num, "%d PLAYER", i+1);
-			print_text(&state, player_num,
-					(vector2_t){181, 201 + 30 * i});
-		}
-
-		sprintf(player_num, "%d PLAYER", state.player_count);
-		print_text_color(&state, player_num,
-			(vector2_t){181, 201 + 30 * (state.player_count - 1)},
-			(color_t){0, 255, 0, 255});
-
-		graphics_flush(state.device);
-	}
+	/* show menu */
+	game_menu(&state);
 
 	/* initialize round */
 	game_init(&state);
 
-	int alive = state.player_count;
+	int alive;
 
 	rpi_sys_timer_t *timer = RPI_GetSystemTimer();
 	uint32_t prev = timer->counter_lo;
@@ -126,6 +103,8 @@ menu:
 
 	/* main loop */
 	while (1) {
+		alive = state.player_count;
+
 		/* time delta */
 		new = timer->counter_lo;
 		state.delta = (float)(new - prev)/1000000;
@@ -137,15 +116,16 @@ menu:
 		/* draw */
 		game_draw(&state);
 
-		/*write full frame*/
+		/* write full frame */
 		graphics_flush(state.device);
 
-		/* check game state transition conditions */
+		/* check for alive players */
 		for (int i = 0; i < state.player_count; i++)
 			if (state.player[i].lives == 0)
 				alive--;
 
-		if (!alive)
+		if ((state.player_count == 1 && !alive) ||
+			(state.player_count > 1 && alive == 1))
 			break;
 	}
 
