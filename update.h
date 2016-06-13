@@ -5,7 +5,6 @@
 #include "entity.h"
 #include "box.h"
 #include "bullet.h"
-#include "sprite.h"
 #include "player.h"
 
 void update_entity(game_state_t *state, entity_t *ent);
