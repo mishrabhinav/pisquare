@@ -5,7 +5,6 @@
 #include "player.h"
 #include "box.h"
 #include "sprite.h"
-#include "minmax.h"
 
 /* Splash */
 void draw_splash(const game_state_t *state);
