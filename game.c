@@ -63,7 +63,7 @@ static void print_time(game_state_t *state)
 
 	int x = state->device->width - len * 20;
 
-	print_text(state, str, (vector2_t){x, 486});
+	print_text(state, str, &(vector2_t){x, 486});
 }
 
 static void print_lives(game_state_t *state)
@@ -71,8 +71,8 @@ static void print_lives(game_state_t *state)
 	char str[10];
 
 	sprintf(str, "HEALTH %d", state->player->lives);
-	print_text_color(state, str, (vector2_t){0, 486},
-			 (color_t){ .r = 255, .g = 0, .b = 0, .a = 255});
+	print_text_color(state, str, &(vector2_t){0, 486},
+			 &(color_t){ .r = 255, .g = 0, .b = 0, .a = 255});
 }
 
 static void print_io(game_state_t *state)
@@ -93,8 +93,8 @@ static void print_fps(game_state_t *state)
 	char str[2];
 
 	sprintf(str, "%d", state->fps);
-	print_text_color(state, str, (vector2_t){250, 486},
-						(color_t){0, 255, 0, 255});
+	print_text_color(state, str, &(vector2_t){250, 486},
+			 &(color_t){0, 255, 0, 255});
 }
 
 void game_init(game_state_t *state)
@@ -232,13 +232,13 @@ void game_over(game_state_t *state)
 	char str[16];
 
 	draw_background(state);
-	print_text(state, "GAME OVER", (vector2_t){165, 181});
+	print_text(state, "GAME OVER", &(vector2_t){165, 181});
 
 	if (state->player_count == 1) {
 		sprintf(str, "TIME: %.1f", state->timer_game);
-		print_text(state, str, (vector2_t){165, 231});
+		print_text(state, str, &(vector2_t){165, 231});
 	} else {
-		print_text(state, "PLAYER : WON", (vector2_t){165, 231});
+		print_text(state, "PLAYER : WON", &(vector2_t){165, 231});
 	}
 
 }
