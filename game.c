@@ -35,7 +35,7 @@ static void add_box(game_state_t *state)
 
 	int grey = random_int(128) + 127;
 
-	box->entity->size = (vector2_t){12, 12};
+	box->entity->size = (vector2_t){8, 8};
 	box->entity->pos = (vector2_t){posx, posy};
 	box->entity->vel = (vector2_t){!up * vel, up * vel};
 	box->color = (color_t){grey, grey, grey, 255};
