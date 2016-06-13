@@ -80,9 +80,9 @@ void kernel_main(unsigned int r0, unsigned int r1, unsigned int atags)
 
 	draw_splash(&state);
 
-	RPI_WaitMicroSeconds(800000);
-
 	/* set main controller */
+	RPI_WaitMicroSeconds(1500000);
+
 	RPI_SetGpioInput(PLAYER_1_RIGHT);
 	RPI_GetGpio()->GPPUD = 2;
 	RPI_SetGpioInput(PLAYER_1_LEFT);
@@ -131,7 +131,7 @@ menu:
 
 	RPI_WaitMicroSeconds(500000);
 	game_over(&state);
-	print_text(&state, "PRESS RL TO RESTART", (vector2_t){66, 484});
+	print_text(&state, "PRESS RL TO RESTART", &(vector2_t){66, 484});
 	graphics_flush(state.device);
 
 	while (RPI_GetGpioValue(PLAYER_1_RIGHT) != 0)

@@ -4,27 +4,28 @@
 
 #include "assets/assets.h"
 
-void print_text_color(game_state_t *state, const char *string, vector2_t pos,
-		      color_t col)
+void print_text_color(const game_state_t *state, const char *string,
+		      const vector2_t *pos, const color_t *col)
 {
 	size_t len;
 	vector2_t p;
 	unsigned char *letter;
 
 	len = strlen(string);
-	p = pos;
+	p = *pos;
 
 	for (size_t i = 0; i < len; i++) {
 		letter = get_letter(string[i]);
-		graphics_draw_image(state->device, &p, letter, &col);
+		graphics_draw_image(state->device, &p, letter, col);
 		p.x += 20;
 	}
 
 }
 
-void print_text(game_state_t *state, const char *string, vector2_t pos)
+void print_text(const game_state_t *state,
+		const char *string, const vector2_t *pos)
 {
-	print_text_color(state, string, pos, (color_t){255, 255, 255, 255});
+	print_text_color(state, string, pos, &(color_t){255, 255, 255, 255});
 }
 
 unsigned char *get_letter(char letter)

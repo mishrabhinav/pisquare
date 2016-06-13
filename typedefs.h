@@ -1,6 +1,8 @@
 #ifndef TYPEDEFS_H
 #define TYPEDEFS_H
 
+#include <stdlib.h>
+
 #include "vector2.h"
 
 typedef struct {
@@ -9,8 +11,8 @@ typedef struct {
 } rect_t;
 
 typedef struct {
-	int width;
-	int height;
+	size_t width;
+	size_t height;
 	unsigned char *image;
 } image_t;
 
