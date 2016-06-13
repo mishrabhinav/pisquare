@@ -42,6 +42,20 @@ static void add_box(game_state_t *state)
 	state->boxes[state->boxes_count-1] = *box;
 }
 
+static int will_collide(player_t *player, box_t *box)
+{
+	if (player->entity->pos.x < box->entity->pos.x + box->entity->size.x &&
+		player->entity->pos.x + player->entity->size.x >
+						box->entity->pos.x &&
+		player->entity->pos.y <
+				box->entity->pos.y + box->entity->size.y &&
+		player->entity->pos.y + player->entity->size.y >
+						box->entity->pos.y)
+		return 1;
+
+	return 0;
+}
+
 static void print_time(game_state_t *state)
 {
 	char str[10];
@@ -56,7 +70,7 @@ static void print_lives(game_state_t *state)
 {
 	char str[10];
 
-	sprintf(str, "LIVES %d", state->player->lives);
+	sprintf(str, "HEALTH %d", state->player->lives);
 	print_text_color(state, str, (vector2_t){0, 486},
 			 (color_t){ .r = 255, .g = 0, .b = 0, .a = 255});
 }
@@ -65,11 +79,13 @@ static void print_io(game_state_t *state)
 {
 	char str[3];
 
-	str[0] = RPI_GetGpioValue(state->player->right_pin) > 0 ? '1' : '0';
-	str[1] = RPI_GetGpioValue(state->player->left_pin) > 0 ? '1' : '0';
+	str[0] = RPI_GetGpioValue(state->player[0].right_pin) > 0 ? '1' : '0';
+	str[1] = RPI_GetGpioValue(state->player[0].left_pin) > 0 ? '1' : '0';
 	str[2] = 0;
 
-	print_text(state, str, (vector2_t){200, 486});
+	(void) str;
+
+	/* print_text(state, str, (vector2_t){200, 486}); */
 }
 
 static void print_fps(game_state_t *state)
@@ -92,20 +108,20 @@ void game_init(game_state_t *state)
 	state->boxes_count = 0;
 
 	/* player */
-	player_t *player = player_new();
+	for (int i = 0; i < state->player_count; i++) {
+		player_t *player = player_new();
 
-	player->entity->pos = (vector2_t){256, 256};
-	player->angular_vel = 0;
-	player->color = (color_t){0, 255, 0, 255};
-	player->right_pin = RPI_GPIO2;
-	player->left_pin = RPI_GPIO3;
+		player->entity->pos = get_pos(i+1);
+		player->angular_vel = 0;
+		player->color = get_colour(i + 1);
+		player->right_pin = get_right_pin(i + 1);
+		player->left_pin = get_left_pin(i + 1);
 
-	RPI_SetGpioInput(player->right_pin);
-	RPI_SetGpioInput(player->left_pin);
+		RPI_SetGpioInput(player->right_pin);
+		RPI_SetGpioInput(player->left_pin);
 
-	RPI_GetGpio()->GPPUD = 2;
-
-	state->player = player;
+		state->player[i] = *player;
+	}
 
 	/* timers */
 	state->timer_box = 0;
@@ -119,6 +135,16 @@ void game_update(game_state_t *state)
 	state->timer_game += state->delta;
 	state->timer_frame += state->delta;
 
+	/* Detect collisions */
+	for (int j = 0; j < state->player_count; j++) {
+		for (int i = 0; i < state->boxes_count; i++) {
+			if (state->player[j].lives > 0)
+				if (will_collide(&state->player[j],
+							&state->boxes[i]))
+					state->player[j].lives--;
+		}
+	}
+
 	/* Diagnostics */
 	if (state->timer_frame >= 1.f) {
 		state->fps = state->frames_count;
@@ -126,23 +152,25 @@ void game_update(game_state_t *state)
 		state->timer_frame = 0;
 	}
 
-	if ((int)state->player->entity->pos.x <= 0 ||
-		(int)state->player->entity->pos.y <= 0 ||
-		(int)(state->player->entity->pos.x
-		       + state->player->entity->size.x) >= 511 ||
-		(int)(state->player->entity->pos.y
-		       + state->player->entity->size.x) >= 481)
-		state->player->speed = 0;
+	for (int i = 0; i < state->player_count; i++) {
+		if ((int)state->player[i].entity->pos.x <= 0 ||
+			(int)state->player[i].entity->pos.y <= 0 ||
+			(int)(state->player[i].entity->pos.x
+			       + state->player[i].entity->size.x) >= 511 ||
+			(int)(state->player[i].entity->pos.y
+			       + state->player[i].entity->size.x) >= 481)
+			state->player[i].speed = 0;
 
-	/* IO */
-	if (RPI_GetGpioValue(state->player->right_pin) == 0) {
-		state->player->speed = 50;
-		state->player->angular_vel = 270;
-	} else if (RPI_GetGpioValue(state->player->left_pin) == 0) {
-		state->player->speed = 50;
-		state->player->angular_vel = -270;
-	} else
-		state->player->angular_vel = 0;
+		/* IO */
+		if (RPI_GetGpioValue(state->player[i].right_pin) == 0) {
+			state->player[i].speed = 50;
+			state->player[i].angular_vel = 270;
+		} else if (RPI_GetGpioValue(state->player[i].left_pin) == 0) {
+			state->player[i].speed = 50;
+			state->player[i].angular_vel = -270;
+		} else
+			state->player[i].angular_vel = 0;
+	}
 
 
 	/* Boxes */
@@ -157,12 +185,9 @@ void game_update(game_state_t *state)
 		move_box(state, &state->boxes[i]);
 
 	/* Player */
-	move_player(state, state->player);
-
-	/* Detect collisions */
-	for (int i = 0; i < state->boxes_count; i++) {
-		box_t box = state->boxes[i];
-		(void)box;
+	for (int i = 0; i < state->player_count; i++) {
+		if (state->player[i].lives > 0)
+			move_player(state, &state->player[i]);
 	}
 
 }
@@ -178,7 +203,8 @@ void game_draw(game_state_t *state)
 
 
 	/* player */
-	draw_player(state, state->player);
+	for (int i = 0; i < state->player_count; i++)
+		draw_player(state, &state->player[i]);
 
 	/* UI */
 	print_time(state);
@@ -198,4 +224,21 @@ void game_free(game_state_t *state)
 
 	free(state->boxes);
 	free(state->player);
+}
+
+void game_over(game_state_t *state)
+{
+
+	char str[16];
+
+	draw_background(state);
+	print_text(state, "GAME OVER", (vector2_t){165, 181});
+
+	if (state->player_count == 1) {
+		sprintf(str, "TIME: %.1f", state->timer_game);
+		print_text(state, str, (vector2_t){165, 231});
+	} else {
+		print_text(state, "PLAYER : WON", (vector2_t){165, 231});
+	}
+
 }

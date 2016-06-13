@@ -19,6 +19,7 @@
 #define SCREEN_WIDTH    512
 #define SCREEN_HEIGHT   512
 #define SCREEN_DEPTH    32      /* 16 or 32-bit */
+#define MAX_PLAYERS	4
 
 static game_state_t state;
 
@@ -74,17 +75,22 @@ void kernel_main(unsigned int r0, unsigned int r1, unsigned int atags)
 	state.device = graphics_create(SCREEN_WIDTH,
 				       SCREEN_HEIGHT,
 				       SCREEN_DEPTH);
-	state.player_count = 0;
+
+	state.player = calloc(MAX_PLAYERS + 1, sizeof(player_t));
 
 	draw_splash(&state);
 
-	RPI_WaitMicroSeconds(10000000);
-
+	RPI_WaitMicroSeconds(1500000);
 
 	RPI_SetGpioInput(PLAYER_1_RIGHT);
 	RPI_GetGpio()->GPPUD = 2;
 	RPI_SetGpioInput(PLAYER_1_LEFT);
 	RPI_GetGpio()->GPPUD = 2;
+
+menu:
+	state.player_count = 1;
+		/* menu */
+		char player_num[8];
 
 	while (RPI_GetGpioValue(PLAYER_1_RIGHT) != 0) {
 		draw_background(&state);
@@ -93,68 +99,70 @@ void kernel_main(unsigned int r0, unsigned int r1, unsigned int atags)
 		print_text(&state, "L : SELECT    R : START",
 				(vector2_t){36, 484});
 
-		print_text(&state, "1 PLAYER", (vector2_t){181, 201});
-		print_text(&state, "2 PLAYER", (vector2_t){181, 231});
-		print_text(&state, "3 PLAYER", (vector2_t){181, 261});
-		print_text(&state, "4 PLAYER", (vector2_t){181, 291});
-
 		if (RPI_GetGpioValue(PLAYER_1_LEFT) == 0)
-			state.player_count = (state.player_count + 1) % 4;
+			state.player_count = (state.player_count) % 4 + 1;
 
-		switch (state.player_count + 1) {
-		case 1:
-			print_text_color(&state, "1 PLAYER",
-					(vector2_t){181, 201},
-					(color_t){0, 255, 0, 255});
-			break;
-		case 2:
-			print_text_color(&state, "2 PLAYER",
-					(vector2_t){181, 231},
-					(color_t){0, 255, 0, 255});
-			break;
-		case 3:
-			print_text_color(&state, "3 PLAYER",
-					(vector2_t){181, 261},
-					(color_t){0, 255, 0, 255});
-			break;
-		case 4:
-			print_text_color(&state, "4 PLAYER",
-					(vector2_t){181, 291},
-					(color_t){0, 255, 0, 255});
-			break;
+		for (int i = 0; i < 4; i++) {
+			sprintf(player_num, "%d PLAYER", i+1);
+			print_text(&state, player_num,
+					(vector2_t){181, 201 + 30 * i});
 		}
+
+		sprintf(player_num, "%d PLAYER", state.player_count);
+		print_text_color(&state, player_num,
+			(vector2_t){181, 201 + 30 * (state.player_count - 1)},
+			(color_t){0, 255, 0, 255});
 
 		graphics_flush(state.device);
 	}
 
+	/* initialize round */
 	game_init(&state);
 
-	uint32_t diff, new;
-
-	float secondsElapsed;
+	int alive = state.player_count;
 
 	rpi_sys_timer_t *timer = RPI_GetSystemTimer();
 	uint32_t prev = timer->counter_lo;
+	uint32_t new;
 
-	RPI_SetGpioInput(RPI_GPIO18);
-
+	/* main loop */
 	while (1) {
 		/* time delta */
 		new = timer->counter_lo;
-		diff = new - prev;
+		state.delta = (float)(new - prev)/1000000;
 		prev = new;
-		secondsElapsed = (float)diff/1000000;
-
-		state.delta = secondsElapsed;
 
 		/* update */
 		game_update(&state);
+
 		/* draw */
 		game_draw(&state);
+
 		/*write full frame*/
 		graphics_flush(state.device);
 
 		/* check game state transition conditions */
-		/* perform transition */
+		for (int i = 0; i < state.player_count; i++)
+			if (state.player[i].lives == 0)
+				alive--;
+
+		if (!alive)
+			break;
 	}
+
+	RPI_WaitMicroSeconds(500000);
+	game_over(&state);
+	print_text(&state, "PRESS RL TO RESTART", (vector2_t){66, 484});
+	graphics_flush(state.device);
+
+	while (RPI_GetGpioValue(PLAYER_1_RIGHT) != 0)
+		;
+
+	while (RPI_GetGpioValue(PLAYER_1_LEFT) != 0)
+		;
+
+	draw_background(&state);
+	graphics_flush(state.device);
+
+	goto menu;
 }
