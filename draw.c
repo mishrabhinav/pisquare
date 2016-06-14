@@ -29,22 +29,23 @@ void draw_square(const game_state_t *state, vector2_t *pos, float width,
 					pos->y + (s + c) * width/2};
 	vs[1].pos = (vector2_t){pos->x - (c + s) * width/2,
 					pos->y + (c - s) * width/2};
-	vs[2].pos = (vector2_t){pos->x + (s + c) * width/2,
-						pos->y + (s - c) * width/2};
-	vs[3] = vs[2];
-	vs[4] = vs[1];
-	vs[5].pos = (vector2_t){pos->x + (s - c) * width/2,
+	vs[2].pos = (vector2_t){pos->x + (s - c) * width/2,
 					pos->y - (s + c) * width/2};
+	vs[3].pos = (vector2_t){pos->x + (s + c) * width/2,
+						pos->y + (s - c) * width/2};
 
 
 	vs[0].color = *color;
 	vs[1].color = *color;
 	vs[2].color = *color;
 	vs[3].color = *color;
-	vs[4].color = *color;
-	vs[5].color = *color;
 
-	graphics_draw(state->device, vs, 6);
+	graphics_draw_line(state->device, &vs[0], &vs[1]);
+	graphics_draw_line(state->device, &vs[1], &vs[2]);
+	graphics_draw_line(state->device, &vs[2], &vs[3]);
+	graphics_draw_line(state->device, &vs[0], &vs[3]);
+
+	/* graphics_draw(state->device, vs, 6); */
 }
 
 void draw_box(const game_state_t *state, const box_t *box)

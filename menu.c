@@ -66,9 +66,16 @@ void menu_draw(game_state_t *state)
 	print_text_color(state, player_num,
 		&(vector2_t){181, 201 + 30 * (state->player_count - 1)}, &col);
 
-	/*draw_square(state,
-	*	&(vector2_t){160, 208 + 30 * (state->player_count - 1)},
-	*			14, (int)(360 * state->time/0.5f) % 360,
-	*				&(color_t){0, 255, 0, 255});
-	*/
+	cvertex_t v1 = (cvertex_t){{50, 100}, {0, 0, 255, 255} };
+	cvertex_t v2 = (cvertex_t){{100, 100}, {0, 0, 255, 255} };
+	cvertex_t v3 = (cvertex_t){{100, 110}, {0, 255, 0, 255} };
+	cvertex_t v4 = (cvertex_t){{50, 110}, {0, 255, 0, 255} };
+
+	graphics_draw_line(state->device, &v1, &v2);
+	graphics_draw_line(state->device, &v3, &v4);
+
+	draw_square(state,
+		&(vector2_t){160, 208 + 30 * (state->player_count - 1)},
+				14, (int)(360 * state->time/2.f) % 360,
+					&(color_t){0, 255, 0, 255});
 }
