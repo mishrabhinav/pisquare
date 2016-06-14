@@ -33,10 +33,8 @@ void regenerate_box(game_state_t *state, box_t *box)
 	int sign = 2 * forward - 1;
 	float vel = sign * (random_int(50) + 10);
 
-	int randy = random_int(state->area.y - box->entity->size.y)
-						+ box->entity->size.y/2;
-	int randx = random_int(state->area.x - box->entity->size.x)
-						+ box->entity->size.x/2;
+	int randy = random_int(state->area.y - box->entity->size.y);
+	int randx = random_int(state->area.x - box->entity->size.x);
 
 	int posx = !up * (-box->entity->size.x + !forward * (state->area.x
 						+ box->entity->size.x))
