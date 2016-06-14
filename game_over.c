@@ -19,7 +19,6 @@ scene_t *game_over_scene(void)
 void game_over_init(game_state_t *state)
 {
 	(void)state;
-	io_reset(state);
 }
 
 int game_over_update(game_state_t *state)

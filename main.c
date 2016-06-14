@@ -35,6 +35,7 @@ static void goto_scene(scene_t *next)
 	/*if (next && next->free)
 	*	next->free(&state);
 	*/
+	io_reset(&state);
 	scene = next;
 	scene->init(&state);
 	state.time = 0;
@@ -111,7 +112,7 @@ void kernel_main(unsigned int r0, unsigned int r1, unsigned int atags)
 	game_over = game_over_scene();
 
 	splash->next_scene = menu;
-	menu->next_scene = menu_players;
+	menu->next_scene = game;
 	menu_players->next_scene = game;
 	game->next_scene = game_over;
 	game_over->next_scene = menu;
