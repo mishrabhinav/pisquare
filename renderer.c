@@ -250,14 +250,28 @@ void graphics_draw_rectangle_outline(const graphics_t *device,
 	size_t dx, dy;
 	color_t *p;
 
+	size_t xmin = 0;
+	size_t xmax = hw->x;
+	size_t ymin = 0;
+	size_t ymax = hw->y;
+
+	if (pos->x + xmax > device->width)
+		xmax = device->width - pos->x;
+	if (pos->x < 0)
+		xmin = -pos->x;
+	if (pos->y + ymax > device->height)
+		ymax = device->height - pos->y;
+	if (pos->y < 0)
+		ymin = -pos->y;
+
 	/* horizontal */
-	for (dx = 0; dx < hw->x; dx++) {
+	for (dx = xmin; dx < xmax; dx++) {
 		p = get_pixel(device, pos->x + dx, pos->y);
 		p->b = color->b;
 		p->g = color->g;
 		p->r = color->r;
 		p->a = color->a;
-		p = get_pixel(device, pos->x + dx, pos->y + hw->y - 1);
+		p = get_pixel(device, pos->x + dx, pos->y + ymax - 1);
 		p->b = color->b;
 		p->g = color->g;
 		p->r = color->r;
@@ -265,13 +279,13 @@ void graphics_draw_rectangle_outline(const graphics_t *device,
 	}
 
 	/* vertical */
-	for (dy = 1; dy < hw->y - 1; dy++) {
+	for (dy = ymin + 1; dy < ymax - 1; dy++) {
 		p = get_pixel(device, pos->x, pos->y + dy);
 		p->b = color->b;
 		p->g = color->g;
 		p->r = color->r;
 		p->a = color->a;
-		p = get_pixel(device, pos->x + hw->x - 1, pos->y + dy);
+		p = get_pixel(device, pos->x + xmax - 1, pos->y + dy);
 		p->b = color->b;
 		p->g = color->g;
 		p->r = color->r;
@@ -284,9 +298,22 @@ void graphics_draw_rectangle(const graphics_t *device, const color_t *color,
 {
 	size_t dx, dy;
 	color_t *p;
+	size_t xmin = 0;
+	size_t xmax = hw->x;
+	size_t ymin = 0;
+	size_t ymax = hw->y;
 
-	for (dx = 0; dx < hw->x; dx++) {
-		for (dy = 0; dy < hw->y; dy++) {
+	if (pos->x + xmax > device->width)
+		xmax = device->width - pos->x;
+	if (pos->x < 0)
+		xmin = -pos->x;
+	if (pos->y + ymax > device->height)
+		ymax = device->height - pos->y;
+	if (pos->y < 0)
+		ymin = -pos->y;
+
+	for (dx = xmin; dx < xmax; dx++) {
+		for (dy = ymin; dy < ymax; dy++) {
 			p = get_pixel(device, pos->x + dx, pos->y + dy);
 			p->b = color->b;
 			p->g = color->g;

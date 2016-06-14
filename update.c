@@ -16,30 +16,41 @@ void update_box(game_state_t *state, box_t *box)
 {
 	entity_t *entity = box->entity;
 
-	if (entity->pos.x > state->area.x) {
-		entity->pos.x = -entity->size.x;
-		entity->pos.y = random_int(state->area.y
-						-entity->size.y)
-						+ entity->size.y/2;
-	} else if (entity->pos.x + entity->size.x  < 0) {
-		entity->pos.x = state->area.x;
-		entity->pos.y = random_int(state->area.y
-						-entity->size.y)
-						+ entity->size.y/2;
-	}
-	if (entity->pos.y > state->area.y) {
-		entity->pos.y = -entity->size.y;
-		entity->pos.x = random_int(state->area.x
-						-entity->size.x)
-						+ entity->size.x/2;
-	} else if (entity->pos.y + entity->size.y < 0) {
-		entity->pos.y = state->area.y;
-		entity->pos.x = random_int(state->area.x
-						-entity->size.x)
-						+ entity->size.x/2;
-	}
-
 	update_entity(state, entity);
+
+	if ((entity->pos.x > state->area.x)
+		|| (entity->pos.x + entity->size.x  < 0)
+		|| (entity->pos.y > state->area.y)
+		|| (entity->pos.y + entity->size.y < 0)) {
+		regenerate_box(state, box);
+	}
+}
+
+void regenerate_box(game_state_t *state, box_t *box)
+{
+	int up = random_int(2);
+	int forward = random_int(2);
+	int sign = 2 * forward - 1;
+	float vel = sign * (random_int(50) + 10);
+
+	int randy = random_int(state->area.y - box->entity->size.y)
+						+ box->entity->size.y/2;
+	int randx = random_int(state->area.x - box->entity->size.x)
+						+ box->entity->size.x/2;
+
+	int posx = !up * (-box->entity->size.x + !forward * (state->area.x
+						+ box->entity->size.x))
+						+ up * randx;
+	int posy = up * (-box->entity->size.y + !forward * (state->area.y
+						+ box->entity->size.y))
+						+ !up * randy;
+	int rand_size = 6 + random_int(7);
+	int grey = random_int(128) + 128;
+
+	box->entity->size = (vector2_t){rand_size, rand_size};
+	box->entity->pos = (vector2_t){posx, posy};
+	box->entity->vel = (vector2_t){!up * vel, up * vel};
+	box->color = (color_t){grey, grey, grey, 255};
 }
 
 void update_player(game_state_t *state, player_t *player)

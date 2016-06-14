@@ -1,6 +1,7 @@
 #include "box.h"
 
 #include <stdlib.h>
+#include "random.h"
 
 box_t *box_new(void)
 {

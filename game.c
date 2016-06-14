@@ -25,31 +25,9 @@ scene_t *game_scene(void)
 
 static void add_box(game_state_t *state)
 {
-	int up = random_int(2);
-	int forward = random_int(2);
-	int sign = 2 * forward - 1;
-	float vel = sign * (random_int(50) + 10);
-
 	box_t *box = box_new();
 
-	int randy = random_int(state->area.y - box->entity->size.y)
-						+ box->entity->size.y/2;
-	int randx = random_int(state->area.x - box->entity->size.x)
-						+ box->entity->size.x/2;
-
-	int posx = !up * (-box->entity->size.x + !forward * (state->area.x
-						+ box->entity->size.x))
-						+ up * randx;
-	int posy = up * (-box->entity->size.y + !forward * (state->area.y
-						+ box->entity->size.y))
-						+ !up * randy;
-	int rand_size = 6 + random_int(9);
-	int grey = random_int(128) + 128;
-
-	box->entity->size = (vector2_t){rand_size, rand_size};
-	box->entity->pos = (vector2_t){posx, posy};
-	box->entity->vel = (vector2_t){!up * vel, up * vel};
-	box->color = (color_t){grey, grey, grey, 255};
+	regenerate_box(state, box);
 
 	++state->boxes_count;
 	state->boxes = realloc(state->boxes,
@@ -131,7 +109,7 @@ void game_init(game_state_t *state)
 		state->player[i] = *player;
 	}
 
-	for (int i = 0; i < BOX_COUNT_MAX/2; i++)
+	for (int i = 0; i < BOX_COUNT_MAX/8; i++)
 		add_box(state);
 
 	/* timers */
@@ -152,24 +130,6 @@ int game_update(game_state_t *state)
 		state->timer_frame = 0;
 	}
 
-	/* Players */
-	for (int i = 0; i < state->player_count; i++)
-		update_player(state, &state->player[i]);
-
-	/* Collision Detection */
-	for (int j = 0; j < state->player_count; j++) {
-		for (int i = 0; i < state->boxes_count; i++) {
-			if (state->player[j].lives > 0
-					&& state->player[j].debounce_time
-							> PLAYER_DEBOUNCE_TIME)
-				if (collides(&state->player[j],
-							&state->boxes[i])) {
-					state->player[j].lives--;
-					state->player[j].debounce_time = 0;
-				}
-		}
-	}
-
 	/* Boxes */
 	/* Increase number of boxes over time */
 	if (state->timer_box > BOX_TIMER
@@ -186,6 +146,23 @@ int game_update(game_state_t *state)
 		if (state->player[i].lives > 0)
 			update_player(state, &state->player[i]);
 	}
+
+	/* Collision Detection */
+	for (int j = 0; j < state->player_count; j++) {
+		for (int i = 0; i < state->boxes_count; i++) {
+			if (state->player[j].lives > 0
+					&& state->player[j].debounce_time
+							> PLAYER_DEBOUNCE_TIME)
+				if (collides(&state->player[j],
+							&state->boxes[i])) {
+					regenerate_box(state, &state->boxes[i]);
+					state->player[j].lives--;
+					state->player[j].debounce_time = 0;
+				}
+		}
+	}
+
+	/* End Condition */
 	int alive = state->player_count;
 
 	for (int i = 0; i < state->player_count; i++)
@@ -207,7 +184,8 @@ void game_draw(game_state_t *state)
 
 	/* player */
 	for (int i = 0; i < state->player_count; i++)
-		draw_player(state, &state->player[i]);
+		if (state->player[i].lives > 0)
+			draw_player(state, &state->player[i]);
 
 	/* UI */
 	print_time(state);

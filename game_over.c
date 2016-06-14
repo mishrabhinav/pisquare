@@ -43,11 +43,14 @@ void game_over_draw(game_state_t *state)
 		sprintf(str, "TIME: %.1f", state->timer_game);
 		print_text(state, str, &(vector2_t){145, 231});
 	} else {
-		for (int i = 0; i < state->player_count; i++)
-			if (state->player[i].lives > 0)
-				sprintf(str, "PLAYER %i WON", i + 1);
+		color_t col;
 
-		print_text(state, str, &(vector2_t){136, 231});
+		for (int i = 0; i < state->player_count; i++)
+			if (state->player[i].lives > 0) {
+				col = get_color(i + 1);
+				sprintf(str, "PLAYER %i WINS!", i + 1);
+			}
+		print_text_color(state, str, &(vector2_t){136, 231}, &col);
 	}
 	if (state->time > 1.0f)
 		print_text(state, "PRESS RL TO RESTART", &(vector2_t){66, 484});
