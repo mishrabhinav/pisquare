@@ -114,6 +114,8 @@ void game_init(game_state_t *state)
 
 	/* timers */
 	state->timer_box = 0;
+	state->timer_game = 0;
+	state->timer_frame = 0;
 }
 
 int game_update(game_state_t *state)
