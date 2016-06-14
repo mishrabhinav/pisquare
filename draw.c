@@ -40,7 +40,7 @@ void draw_square(const game_state_t *state, vector2_t *pos, float width,
 	vs[2].color = *color;
 	vs[3].color = *color;
 
-	graphics_draw_line(state->device, &vs[0], &vs[1]);
+	graphics_draw_line(state->device, &vs[1], &vs[0]);
 	graphics_draw_line(state->device, &vs[1], &vs[2]);
 	graphics_draw_line(state->device, &vs[2], &vs[3]);
 	graphics_draw_line(state->device, &vs[0], &vs[3]);

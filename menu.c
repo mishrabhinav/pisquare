@@ -76,6 +76,5 @@ void menu_draw(game_state_t *state)
 
 	draw_square(state,
 		&(vector2_t){160, 208 + 30 * (state->player_count - 1)},
-				14, (int)(360 * state->time/2.f) % 360,
-					&(color_t){0, 255, 0, 255});
+				14, (int)(360 * state->time/2.f) % 90, &col);
 }
