@@ -63,8 +63,10 @@ void draw_player(const game_state_t *state, const player_t *player)
 				&player->entity->pos, &player->entity->size);
 
 	vector2_t pos = (vector2_t){player->entity->pos.x
+				+ player->entity->size.x/2 - 3
 				+ 15 * cosf((float)M_PI * player->dir/180.f),
 					player->entity->pos.y
+				+ player->entity->size.y/2 - 3
 				+ 15 * sinf((float)M_PI * player->dir/180.f)};
 
 	vector2_t size = (vector2_t){6, 6};
