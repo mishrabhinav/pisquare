@@ -55,6 +55,11 @@ void regenerate_box(game_state_t *state, box_t *box)
 
 void update_player(game_state_t *state, player_t *player)
 {
+	/* Timing */
+	player->timer_flash += state->delta;
+	if (player->timer_flash > PLAYER_TIMER_FLASH)
+		player->timer_flash = 0;
+
 	/* Movement */
 	player->debounce_time += state->delta;
 	player->dir = fmodf(player->dir + player->angular_vel * state->delta,

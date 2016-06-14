@@ -71,6 +71,11 @@ void draw_player(const game_state_t *state, const player_t *player)
 
 	vector2_t size = (vector2_t){6, 6};
 
+	if (player->lives == 1 && player->timer_flash < PLAYER_TIMER_FLASH/2)
+		graphics_draw_rectangle_outline(state->device,
+			&(color_t){0, 0, 255, 255}, &player->entity->pos,
+							&player->entity->size);
+
 	graphics_draw_rectangle_dither(state->device, &player->color, &pos,
 							&size);
 

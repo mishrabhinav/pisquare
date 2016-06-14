@@ -11,6 +11,7 @@
 #define PLAYER_DEFAULT_DIRECTION 90
 #define PLAYER_DEBOUNCE_TIME 1.5f
 #define PLAYER_SPEED_INCREASE 100
+#define PLAYER_TIMER_FLASH 0.3f
 
 #define PLAYER_1_RIGHT RPI_GPIO4
 #define PLAYER_1_LEFT RPI_GPIO7
@@ -39,6 +40,7 @@ typedef struct {
 	float angular_vel;
 	int lives;
 	float debounce_time;
+	float timer_flash;
 	color_t color;
 	rpi_gpio_pin_t left_pin;
 	rpi_gpio_pin_t right_pin;
