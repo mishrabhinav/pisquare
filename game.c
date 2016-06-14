@@ -36,17 +36,26 @@ static void add_box(game_state_t *state)
 	state->boxes[state->boxes_count-1] = *box;
 }
 
-static int collides(player_t *player, box_t *box)
+static bullet_t *add_bullet(game_state_t *state)
 {
-	if (player->entity->pos.x < box->entity->pos.x + box->entity->size.x &&
-		player->entity->pos.x + player->entity->size.x >
-						box->entity->pos.x &&
-		player->entity->pos.y <
-				box->entity->pos.y + box->entity->size.y &&
-		player->entity->pos.y + player->entity->size.y >
-						box->entity->pos.y)
-		return 1;
+	/* search for unused bullets */
+	bullet_t *bullet = bullet_new();
 
+	++state->bullets_count;
+	state->bullets = realloc(state->bullets,
+				state->bullets_count * sizeof(bullet_t));
+
+	state->bullets[state->bullets_count-1] = *bullet;
+	return bullet;
+}
+
+static int collides(entity_t *e1, entity_t *e2)
+{
+	if (e1->pos.x < e2->pos.x + e2->size.x
+		&& e1->pos.x + e1->size.x > e2->pos.x
+		&& e1->pos.y < e2->pos.y + e2->size.y
+		&& e1->pos.y + e1->size.y > e2->pos.y)
+		return 1;
 	return 0;
 }
 
@@ -78,7 +87,7 @@ static void print_fps(game_state_t *state)
 {
 	char str[2];
 
-	sprintf(str, "%d", state->fps);
+	sprintf(str, "%d", state->bullets_count);
 	print_text_color(state, str, &(vector2_t){320, 486},
 			 &(color_t){0, 255, 0, 255});
 }
@@ -93,12 +102,14 @@ void game_init(game_state_t *state)
 	/* boxes */
 	state->boxes_count = 0;
 
+	/* bullets */
+	state->bullets_count = 0;
+
 	/* player */
 	for (int i = 0; i < state->player_count; i++) {
 		player_t *player = player_new();
 
 		player->entity->pos = get_pos(i+1);
-		player->angular_vel = 0;
 		player->color = get_color(i + 1);
 		player->right_pin = get_right_pin(i + 1);
 		player->left_pin = get_left_pin(i + 1);
@@ -139,28 +150,65 @@ int game_update(game_state_t *state)
 		state->timer_box = 0;
 		add_box(state);
 	}
-	/* Move Boxes */
+	/* Update Boxes */
 	for (int i = 0; i < state->boxes_count; i++)
 		update_box(state, &state->boxes[i]);
 
+	/* Update Bullets */
+	for (int i = 0; i < state->bullets_count; i++)
+		if (!state->bullets[i].dead)
+			update_bullet(state, &state->bullets[i]);
+
 	/* Player */
 	for (int i = 0; i < state->player_count; i++) {
-		if (state->player[i].lives > 0)
+		if (state->player[i].lives > 0) {
 			update_player(state, &state->player[i]);
+			if (state->player[i].shoot) {
+				player_shoot(&state->player[i],
+							add_bullet(state));
+			}
+		}
 	}
 
 	/* Collision Detection */
+	/* Players with boxes */
 	for (int j = 0; j < state->player_count; j++) {
-		for (int i = 0; i < state->boxes_count; i++) {
-			if (state->player[j].lives > 0
-					&& state->player[j].debounce_time
-							> PLAYER_DEBOUNCE_TIME)
-				if (collides(&state->player[j],
-							&state->boxes[i])) {
+		if (state->player[j].lives > 0
+				&& state->player[j].debounce_time
+						> PLAYER_DEBOUNCE_TIME) {
+			/* Boxes */
+			for (int i = 0; i < state->boxes_count; i++) {
+				if (collides(state->player[j].entity,
+						state->boxes[i].entity)) {
 					regenerate_box(state, &state->boxes[i]);
-					state->player[j].lives--;
-					state->player[j].debounce_time = 0;
+					player_injure(&state->player[j]);
 				}
+			}
+		}
+	}
+	/* Bullets with Players/Boxes */
+	for (int i = 0; i < state->bullets_count; i++) {
+		/* Players */
+		if (!state->bullets[i].dead) {
+			for (int j = 0; j < state->player_count; j++) {
+				if (state->player[j].lives > 0
+					&& state->player[j].debounce_time
+					> PLAYER_DEBOUNCE_TIME
+					&& collides(state->player[j].entity,
+						state->bullets[i].entity)) {
+					player_injure(&state->player[j]);
+					state->bullets[i].dead = 1;
+				}
+			}
+
+			/* Boxes */
+			for (int j = 0; j < state->boxes_count; j++) {
+				if (collides(state->boxes[j].entity,
+						state->bullets[i].entity)) {
+					regenerate_box(state, &state->boxes[j]);
+					state->bullets[i].dead = 1;
+				}
+			}
 		}
 	}
 
@@ -183,6 +231,10 @@ void game_draw(game_state_t *state)
 	for (int i = 0; i < state->boxes_count; i++)
 		draw_box(state, &state->boxes[i]);
 
+	/* bullets */
+	for (int i = 0; i < state->bullets_count; i++)
+		if (!state->bullets[i].dead)
+			draw_bullet(state, &state->bullets[i]);
 
 	/* player */
 	for (int i = 0; i < state->player_count; i++)

@@ -4,6 +4,7 @@
 #include "renderer.h"
 #include "player.h"
 #include "box.h"
+#include "bullet.h"
 
 #define BOX_TIMER 1.0f
 #define BOX_COUNT_MAX 50
@@ -20,8 +21,10 @@ typedef struct game_state {
 	player_t *player;
 
 	box_t *boxes;
+	bullet_t *bullets;
 
 	int boxes_count;
+	int bullets_count;
 	int player_count;
 	int frames_count;
 	int fps;

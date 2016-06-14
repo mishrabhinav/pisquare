@@ -4,6 +4,7 @@
 #include "entity.h"
 #include "color.h"
 #include "libarmc/rpi-gpio.h"
+#include "bullet.h"
 
 #define PLAYER_DEFAULT_LIVES 5
 #define PLAYER_DEFAULT_SPEED 30
@@ -11,7 +12,9 @@
 #define PLAYER_DEFAULT_DIRECTION 90
 #define PLAYER_DEBOUNCE_TIME 1.5f
 #define PLAYER_SPEED_INCREASE 100
+#define PLAYER_SPEED_ANGULAR 300
 #define PLAYER_TIMER_FLASH 0.3f
+#define PLAYER_TIMER_SHOOT 1.0f
 
 #define PLAYER_1_RIGHT RPI_GPIO4
 #define PLAYER_1_LEFT RPI_GPIO7
@@ -35,21 +38,24 @@
 
 typedef struct {
 	entity_t *entity;
-	float dir;
+	float dir; /* angle from x-axis in degrees */
 	float speed;
-	float angular_vel;
+	float angular_vel; /* angular velocity */
 	int lives;
-	float debounce_time;
-	float timer_flash;
+	float debounce_time; /* invincibility after collision */
+	float timer_flash; /* counter for flashing */
+	float timer_shoot; /* reload */
+	int shoot; /* flag to shoot */
 	color_t color;
 	rpi_gpio_pin_t left_pin;
 	rpi_gpio_pin_t right_pin;
-	rpi_gpio_value_t left;
-	rpi_gpio_value_t right;
 } player_t;
 
 player_t *player_new(void);
+void player_rotate(player_t *player, float angle);
+void player_injure(player_t *player);
 void player_free(player_t *player);
+void player_shoot(player_t *player, bullet_t *bullet);
 rpi_gpio_pin_t get_right_pin(int player);
 rpi_gpio_pin_t get_left_pin(int player);
 vector2_t get_pos(int player);

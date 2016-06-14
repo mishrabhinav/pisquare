@@ -53,6 +53,12 @@ void draw_box(const game_state_t *state, const box_t *box)
 			&box->entity->pos, &box->entity->size);
 }
 
+void draw_bullet(const game_state_t *state, const bullet_t *bullet)
+{
+	graphics_draw_rectangle(state->device, &bullet->color,
+			&bullet->entity->pos, &bullet->entity->size);
+}
+
 void draw_player(const game_state_t *state, const player_t *player)
 {
 	if (player->debounce_time > PLAYER_DEBOUNCE_TIME)

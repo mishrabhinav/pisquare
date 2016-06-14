@@ -4,6 +4,7 @@
 #include "gamestate.h"
 #include "player.h"
 #include "box.h"
+#include "bullet.h"
 #include "sprite.h"
 
 /* Splash */
@@ -19,6 +20,9 @@ void draw_sprite(const game_state_t *state, const sprite_t *sprite);
 
 /* Box */
 void draw_box(const game_state_t *state, const box_t *box);
+
+/* Bullet */
+void draw_bullet(const game_state_t *state, const bullet_t *bullet);
 
 /* Players */
 void draw_player(const game_state_t *state, const player_t *player);

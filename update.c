@@ -26,6 +26,21 @@ void update_box(game_state_t *state, box_t *box)
 	}
 }
 
+void update_bullet(game_state_t *state, bullet_t *bullet)
+{
+	entity_t *entity = bullet->entity;
+
+	update_entity(state, entity);
+
+	if ((entity->pos.x > state->area.x)
+		|| (entity->pos.x + entity->size.x  < 0)
+		|| (entity->pos.y > state->area.y)
+		|| (entity->pos.y + entity->size.y < 0)) {
+		bullet->dead = true;
+	}
+}
+
+
 void regenerate_box(game_state_t *state, box_t *box)
 {
 	int up = random_int(2);
@@ -51,17 +66,30 @@ void regenerate_box(game_state_t *state, box_t *box)
 	box->color = (color_t){grey, grey, grey, 255};
 }
 
+static inline float min(float a, float b)
+{
+	return a < b ? a : b;
+}
+
 void update_player(game_state_t *state, player_t *player)
 {
 	/* Timing */
 	player->timer_flash += state->delta;
+	player->timer_shoot += state->delta;
+
+	/* Low-Life Flashing */
 	if (player->timer_flash > PLAYER_TIMER_FLASH)
 		player->timer_flash = 0.f;
 
+	/* Shooting */
+	if (player->timer_shoot > PLAYER_TIMER_SHOOT)
+		player->shoot = 1;
+
 	/* Movement */
 	player->debounce_time += state->delta;
-	player->dir = fmodf(player->dir + player->angular_vel * state->delta,
-									360);
+
+	player_rotate(player, player->angular_vel * state->delta);
+
 	player->entity->vel.x = player->speed * cos(M_PI * player->dir/180.f);
 	player->entity->vel.y = player->speed * sin(M_PI * player->dir/180.f);
 
@@ -76,19 +104,34 @@ void update_player(game_state_t *state, player_t *player)
 			* state->time / MAX_DIFFICULTY_TIME;
 
 	/* Boundaries */
-	if ((int)player->entity->pos.x <= 0 ||
-		(int)player->entity->pos.y <= 0 ||
-		(int)(player->entity->pos.x
-		       + player->entity->size.x) >= 511 ||
-		(int)(player->entity->pos.y
-		       + player->entity->size.x) >= 481)
-		player->speed = 0;
+	if (player->entity->pos.x <= 0) { /* left wall */
+		player->entity->vel.x = -player->entity->vel.x;
+		player->entity->pos.x = 0;
+	} else if (player->entity->pos.x /* right wall */
+				+ player->entity->size.x >= state->area.x) {
+		player->entity->vel.x = -player->entity->vel.x;
+		player->entity->pos.x =
+				state->area.x - player->entity->size.x - 1;
+	}
+
+	if (player->entity->pos.y <= 0) { /* top wall */
+		player->entity->vel.y = -player->entity->vel.y;
+		player->entity->pos.y = 0;
+	} else if (player->entity->pos.y  /* bottom wall */
+				+ player->entity->size.y >= state->area.y) {
+		player->entity->vel.y = -player->entity->vel.y;
+		player->entity->pos.y =
+				state->area.y - player->entity->size.y - 1;
+	}
+	/* Update Direction */
+	player->dir = 180
+		* atan2(player->entity->vel.y, player->entity->vel.x)/M_PI;
 
 	/* IO */
 	if (RPI_GetGpioValue(player->right_pin) == 0)
-		player->angular_vel = 270;
+		player->angular_vel = PLAYER_SPEED_ANGULAR;
 	else if (RPI_GetGpioValue(player->left_pin) == 0)
-		player->angular_vel = -270;
+		player->angular_vel = -PLAYER_SPEED_ANGULAR;
 	else
 		player->angular_vel = 0;
 }

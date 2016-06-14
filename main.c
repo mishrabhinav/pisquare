@@ -149,18 +149,7 @@ void kernel_main(unsigned int r0, unsigned int r1, unsigned int atags)
 		/* perform scene transitions */
 		if (!proceed)
 			goto_scene(scene->next_scene);
-
-		/* check for alive players */
-		/*for (int i = 0; i < state.player_count; i++)
-		*	if (state.player[i].lives == 0)
-		*		alive--;
-
-		*if ((state.player_count == 1 && !alive) ||
-		*	(state.player_count > 1 && alive == 1))
-		*	break;
-		*/
 	}
-
 
 	draw_background(&state);
 	graphics_flush(state.device);

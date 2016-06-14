@@ -46,6 +46,7 @@ assets/assets.a: assets
 
 game.c: assets/assets.h
 draw.c: assets/assets.h
+splash.c: assets/assets.h
 text.c: assets/assets.h
 splash.c: assets/assets.h
 

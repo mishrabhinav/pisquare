@@ -1,6 +1,7 @@
 #include "player.h"
 
 #include <stdlib.h>
+#include <math.h>
 
 player_t *player_new(void)
 {
@@ -13,7 +14,10 @@ player_t *player_new(void)
 	new->dir = PLAYER_DEFAULT_DIRECTION;
 	new->speed = PLAYER_DEFAULT_SPEED;
 	new->debounce_time = PLAYER_DEBOUNCE_TIME;
+
+	new->angular_vel = 0;
 	new->timer_flash = 0.f;
+	new->timer_shoot = 0.f;
 	new->color = (color_t){255, 255, 255, 255};
 
 	return new;
@@ -81,6 +85,33 @@ color_t get_color(int player)
 	default:
 		return PLAYER_1_COLOR;
 	}
+}
+
+void player_rotate(player_t *player, float angle)
+{
+	player->dir = fmodf(player->dir + angle, 360);
+}
+
+void player_injure(player_t *player)
+{
+	--player->lives;
+	player->debounce_time = 0;
+}
+
+void player_shoot(player_t *player, bullet_t *bullet)
+{
+	bullet->entity->pos = (vector2_t){player->entity->pos.x
+				+ player->entity->size.x/2 - 2
+				+ 15 * cosf((float)M_PI * player->dir/180.f),
+					player->entity->pos.y
+				+ player->entity->size.y/2 - 2
+				+ 15 * sinf((float)M_PI * player->dir/180.f)};
+
+	bullet->entity->vel = (vector2_t){2 * player->entity->vel.x,
+						2 * player->entity->vel.y};
+	bullet->dead = 0;
+	player->timer_shoot = 0;
+	player->shoot = 0;
 }
 
 void player_free(player_t *player)
