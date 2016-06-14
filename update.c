@@ -58,7 +58,7 @@ void update_player(game_state_t *state, player_t *player)
 	/* Timing */
 	player->timer_flash += state->delta;
 	if (player->timer_flash > PLAYER_TIMER_FLASH)
-		player->timer_flash = 0;
+		player->timer_flash = 0.f;
 
 	/* Movement */
 	player->debounce_time += state->delta;

@@ -13,6 +13,7 @@ player_t *player_new(void)
 	new->dir = PLAYER_DEFAULT_DIRECTION;
 	new->speed = PLAYER_DEFAULT_SPEED;
 	new->debounce_time = PLAYER_DEBOUNCE_TIME;
+	new->timer_flash = 0.f;
 	new->color = (color_t){255, 255, 255, 255};
 
 	return new;
