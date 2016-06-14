@@ -44,6 +44,7 @@ void update_box(game_state_t *state, box_t *box)
 
 void update_player(game_state_t *state, player_t *player)
 {
+	/* Movement */
 	player->debounce_time += state->delta;
 	player->dir = fmodf(player->dir + player->angular_vel * state->delta,
 									360);
@@ -51,6 +52,14 @@ void update_player(game_state_t *state, player_t *player)
 	player->entity->vel.y = player->speed * sin(M_PI * player->dir/180.f);
 
 	update_entity(state, player->entity);
+
+	/* Speed Increase */
+	if (state->time > MAX_DIFFICULTY_TIME)
+		player->speed = PLAYER_SPEED_INCREASE;
+	else
+		player->speed = PLAYER_DEFAULT_SPEED
+			+ PLAYER_SPEED_INCREASE
+			* state->time / MAX_DIFFICULTY_TIME;
 
 	/* Boundaries */
 	if ((int)player->entity->pos.x <= 0 ||
@@ -62,12 +71,10 @@ void update_player(game_state_t *state, player_t *player)
 		player->speed = 0;
 
 	/* IO */
-	if (RPI_GetGpioValue(player->right_pin) == 0) {
-		player->speed = 50;
+	if (RPI_GetGpioValue(player->right_pin) == 0)
 		player->angular_vel = 270;
-	} else if (RPI_GetGpioValue(player->left_pin) == 0) {
-		player->speed = 50;
+	else if (RPI_GetGpioValue(player->left_pin) == 0)
 		player->angular_vel = -270;
-	} else
+	else
 		player->angular_vel = 0;
 }

@@ -5,6 +5,11 @@
 #include "player.h"
 #include "box.h"
 
+#define BOX_TIMER 1.0f
+#define BOX_COUNT_MAX 50
+
+#define MAX_DIFFICULTY_TIME 120.0f
+
 typedef struct game_state {
 	graphics_t *device;
 

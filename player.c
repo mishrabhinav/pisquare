@@ -7,12 +7,13 @@ player_t *player_new(void)
 	player_t *new = malloc(sizeof(player_t));
 
 	new->entity = entity_new();
-	new->entity->size = (vector2_t){16, 16};
-	new->lives = PLAYER_LIVES;
-	new->dir = PLAYER_DIRECTION;
-	new->speed = PLAYER_SPEED;
+	new->entity->size = (vector2_t){PLAYER_DEFAULT_SIZE,
+							PLAYER_DEFAULT_SIZE};
+	new->lives = PLAYER_DEFAULT_LIVES;
+	new->dir = PLAYER_DEFAULT_DIRECTION;
+	new->speed = PLAYER_DEFAULT_SPEED;
 	new->debounce_time = PLAYER_DEBOUNCE_TIME;
-	new->color = (color_t){.r = 0, .g = 0, .b = 255, .a = 255};
+	new->color = (color_t){255, 255, 255, 255};
 
 	return new;
 }

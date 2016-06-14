@@ -43,11 +43,10 @@ static void add_box(game_state_t *state)
 	int posy = up * (-box->entity->size.y + !forward * (state->area.y
 						+ box->entity->size.y))
 						+ !up * randy;
-	(void)vel;
+	int rand_size = 6 + random_int(9);
+	int grey = random_int(128) + 128;
 
-	int grey = random_int(128) + 127;
-
-	box->entity->size = (vector2_t){8, 8};
+	box->entity->size = (vector2_t){rand_size, rand_size};
 	box->entity->pos = (vector2_t){posx, posy};
 	box->entity->vel = (vector2_t){!up * vel, up * vel};
 	box->color = (color_t){grey, grey, grey, 255};
@@ -132,19 +131,18 @@ void game_init(game_state_t *state)
 		state->player[i] = *player;
 	}
 
-	for (int i = 0; i < BOX_COUNT_MAX; i++)
+	for (int i = 0; i < BOX_COUNT_MAX/2; i++)
 		add_box(state);
 
 	/* timers */
 	state->timer_box = 0;
-	state->timer_game = 0;
 }
 
 int game_update(game_state_t *state)
 {
 	/* Timers */
-	state->timer_box += state->delta;
 	state->timer_game += state->delta;
+	state->timer_box += state->delta;
 	state->timer_frame += state->delta;
 
 	/* Diagnostics */

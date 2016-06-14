@@ -3,9 +3,6 @@
 
 #include "gamestate.h"
 
-#define BOX_TIMER 1.0f
-#define BOX_COUNT_MAX 60
-
 scene_t *game_scene(void);
 void game_init(game_state_t *state);
 int game_update(game_state_t *state);
