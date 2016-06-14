@@ -38,14 +38,17 @@ static void add_box(game_state_t *state)
 
 static bullet_t *add_bullet(game_state_t *state)
 {
-	/* search for unused bullets */
-	bullet_t *bullet = bullet_new();
+	/* Find existing unused bullet */
+	for (int i = 0; i < state->bullets_count; i++)
+		if (state->bullets[i].dead)
+			return &state->bullets[i];
+
+	bullet_t *bullet = &state->bullets[state->bullets_count];
+
+	bullet_new(bullet);
 
 	++state->bullets_count;
-	state->bullets = realloc(state->bullets,
-				state->bullets_count * sizeof(bullet_t));
 
-	state->bullets[state->bullets_count-1] = *bullet;
 	return bullet;
 }
 
@@ -104,6 +107,7 @@ void game_init(game_state_t *state)
 
 	/* bullets */
 	state->bullets_count = 0;
+	state->bullets = malloc(BULLET_COUNT_MAX * sizeof(bullet_t));
 
 	/* player */
 	for (int i = 0; i < state->player_count; i++) {
@@ -188,8 +192,8 @@ int game_update(game_state_t *state)
 	}
 	/* Bullets with Players/Boxes */
 	for (int i = 0; i < state->bullets_count; i++) {
-		/* Players */
 		if (!state->bullets[i].dead) {
+			/* Players */
 			for (int j = 0; j < state->player_count; j++) {
 				if (state->player[j].lives > 0
 					&& state->player[j].debounce_time

@@ -107,8 +107,8 @@ void player_shoot(player_t *player, bullet_t *bullet)
 				+ player->entity->size.y/2 - 2
 				+ 15 * sinf((float)M_PI * player->dir/180.f)};
 
-	bullet->entity->vel = (vector2_t){2 * player->entity->vel.x,
-						2 * player->entity->vel.y};
+	bullet->entity->vel = (vector2_t){4 * player->entity->vel.x,
+						4 * player->entity->vel.y};
 	bullet->dead = 0;
 	player->timer_shoot = 0;
 	player->shoot = 0;

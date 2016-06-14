@@ -8,6 +8,7 @@
 
 #define BOX_TIMER 1.0f
 #define BOX_COUNT_MAX 50
+#define BULLET_COUNT_MAX 100
 
 #define MAX_DIFFICULTY_TIME 120.0f
 

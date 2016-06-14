@@ -12,7 +12,7 @@ typedef struct {
 	bool dead;
 } bullet_t;
 
-bullet_t *bullet_new(void);
+bullet_t *bullet_new(bullet_t *bullet);
 void bullet_free(bullet_t *);
 
 #endif

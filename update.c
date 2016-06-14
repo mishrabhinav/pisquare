@@ -36,7 +36,7 @@ void update_bullet(game_state_t *state, bullet_t *bullet)
 		|| (entity->pos.x + entity->size.x  < 0)
 		|| (entity->pos.y > state->area.y)
 		|| (entity->pos.y + entity->size.y < 0)) {
-		bullet->dead = true;
+		bullet->dead = 1;
 	}
 }
 
@@ -81,10 +81,6 @@ void update_player(game_state_t *state, player_t *player)
 	if (player->timer_flash > PLAYER_TIMER_FLASH)
 		player->timer_flash = 0.f;
 
-	/* Shooting */
-	if (player->timer_shoot > PLAYER_TIMER_SHOOT)
-		player->shoot = 1;
-
 	/* Movement */
 	player->debounce_time += state->delta;
 
@@ -128,10 +124,16 @@ void update_player(game_state_t *state, player_t *player)
 		* atan2(player->entity->vel.y, player->entity->vel.x)/M_PI;
 
 	/* IO */
-	if (RPI_GetGpioValue(player->right_pin) == 0)
+	int right = !RPI_GetGpioValue(player->right_pin);
+	int left = !RPI_GetGpioValue(player->left_pin);
+
+	if (right && !left)
 		player->angular_vel = PLAYER_SPEED_ANGULAR;
-	else if (RPI_GetGpioValue(player->left_pin) == 0)
+	else if (!right && left)
 		player->angular_vel = -PLAYER_SPEED_ANGULAR;
 	else
 		player->angular_vel = 0;
+	if (right && left)
+		if (player->timer_shoot > PLAYER_TIMER_SHOOT)
+			player->shoot = 1;
 }
