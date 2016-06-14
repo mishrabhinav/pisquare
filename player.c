@@ -15,6 +15,7 @@ player_t *player_new(void)
 	new->speed = PLAYER_DEFAULT_SPEED;
 	new->debounce_time = PLAYER_DEBOUNCE_TIME;
 
+	new->shoot = 0;
 	new->angular_vel = 0;
 	new->timer_flash = 0.f;
 	new->timer_shoot = 0.f;
