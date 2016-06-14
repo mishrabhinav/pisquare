@@ -33,6 +33,8 @@ void graphics_draw_rectangle_dither(const graphics_t *device,
 	const color_t *color, const vector2_t *pos, const vector2_t *hw);
 void graphics_draw_image(const graphics_t *device, const vector2_t *pos,
 			 const unsigned char *image, const color_t *tint);
+void graphics_draw_line(const graphics_t *device,
+			const cvertex_t *v1, const cvertex_t *v2);
 void graphics_flush(graphics_t *device);
 
 #endif

@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 #include "rpi-mailbox-interface.h"
 
@@ -401,6 +402,43 @@ void graphics_draw_image(const graphics_t *device, const vector2_t *pos,
 			if (device->bpp == 32)
 				p->a = src->a;
 		}
+	}
+}
+
+void graphics_draw_line(const graphics_t *device,
+			const cvertex_t *v1, const cvertex_t *v2)
+{
+	color_t color;
+	color_t *pixel;
+	float x, y;
+	float dx, dy;
+	float xinc, yinc;
+	int i, steps;
+
+	dx = v2->pos.x - v1->pos.x;
+	dy = v2->pos.y - v1->pos.y;
+
+	if (dx > dy)
+		steps = (int)dx;
+	else
+		steps = (int)dy;
+
+	xinc = dx / steps;
+	yinc = dy / steps;
+
+	x = v1->pos.x;
+	y = v1->pos.y;
+
+	for (i = 0; i < steps; i++, x += xinc, y += yinc) {
+		color_interpolate(&color, &v1->color, &v2->color,
+				  (float)i / steps);
+		pixel = get_pixel(device, (size_t)x, (size_t)y);
+
+		pixel->r = color.r;
+		pixel->g = color.g;
+		pixel->b = color.b;
+		if (device->bpp == 32)
+			pixel->a = color.a;
 	}
 }
 
