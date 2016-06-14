@@ -5,6 +5,7 @@
 #include "player.h"
 #include "text.h"
 #include "draw.h"
+#include "io.h"
 
 scene_t *menu_scene(void)
 {
@@ -20,16 +21,21 @@ scene_t *menu_scene(void)
 void menu_init(game_state_t *state)
 {
 	state->player_count = 1;
+	io_reset(state);
 }
 
 int menu_update(game_state_t *state)
 {
-	if (RPI_GetGpioValue(PLAYER_1_RIGHT) == 0)
+	if (state->p1_right_clicked) {
+		io_handle_click_right(state);
 		return 0;
+	}
 
 
-	if (RPI_GetGpioValue(PLAYER_1_LEFT) == 0)
+	if (state->p1_left_held) {
+		io_handle_hold_left(state);
 		state->player_count = (state->player_count) % 4 + 1;
+	}
 
 	return 1;
 }

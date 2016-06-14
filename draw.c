@@ -68,6 +68,7 @@ void draw_player(const game_state_t *state, const player_t *player)
 				+ 15 * sinf((float)M_PI * player->dir/180.f)};
 
 	vector2_t size = (vector2_t){6, 6};
+
 	graphics_draw_rectangle_dither(state->device, &player->color, &pos,
 							&size);
 

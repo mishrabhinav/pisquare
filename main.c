@@ -14,6 +14,7 @@
 #include "menu_players.h"
 #include "game.h"
 #include "game_over.h"
+#include "io.h"
 
 #include "text.h"
 #include "renderer.h"
@@ -131,6 +132,9 @@ void kernel_main(unsigned int r0, unsigned int r1, unsigned int atags)
 		state.delta = (float)(new - prev)/1000000;
 		prev = new;
 		state.time += state.delta;
+
+		/* IO */
+		io_update(&state);
 
 		/* update */
 		proceed = scene->update(&state);

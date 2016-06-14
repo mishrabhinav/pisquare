@@ -313,7 +313,7 @@ void graphics_draw_rectangle_dither(const graphics_t *device,
 		ymin = -pos->y;
 
 	for (dx = xmin; dx < xmax; dx += 2) {
-		for (dy = ymin; dy < ymax; dy+=2) {
+		for (dy = ymin; dy < ymax; dy += 2) {
 			p = get_pixel(device, pos->x + dx, pos->y + dy);
 			p->b = color->b;
 			p->g = color->g;

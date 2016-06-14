@@ -26,11 +26,23 @@ typedef struct game_state {
 	int frames_count;
 	int fps;
 
-	/* Timers */
+	/* Scene & Game Timers */
 	float time;
 	float timer_frame;
 	float timer_box;
 	float timer_game;
+
+	/* IO */
+	int p1_left_down;
+	int p1_right_down;
+	int p1_left_clicked;
+	int p1_right_clicked;
+	int p1_left_held;
+	int p1_right_held;
+	int p1_left_released;
+	int p1_right_released;
+	float p1_left_debounce_timer;
+	float p1_right_debounce_timer;
 } game_state_t;
 
 typedef struct scene {

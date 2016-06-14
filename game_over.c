@@ -1,6 +1,7 @@
 #include "game_over.h"
 #include "draw.h"
 #include "text.h"
+#include "io.h"
 
 #include <stdio.h>
 
@@ -18,16 +19,17 @@ scene_t *game_over_scene(void)
 void game_over_init(game_state_t *state)
 {
 	(void)state;
-	/* set timer */
+	io_reset(state);
 }
 
 int game_over_update(game_state_t *state)
 {
 	(void)state;
 	if (state->time > 1.0f)
-		if (RPI_GetGpioValue(PLAYER_1_RIGHT) == 0 ||
-		    RPI_GetGpioValue(PLAYER_1_LEFT) == 0)
+		if (state->p1_right_clicked) {
+			io_handle_click_right(state);
 			return 0;
+		}
 
 	return 1;
 }
@@ -53,5 +55,5 @@ void game_over_draw(game_state_t *state)
 		print_text_color(state, str, &(vector2_t){136, 231}, &col);
 	}
 	if (state->time > 1.0f)
-		print_text(state, "PRESS RL TO RESTART", &(vector2_t){66, 484});
+		print_text(state, "PRESS R TO RESTART", &(vector2_t){66, 484});
 }
