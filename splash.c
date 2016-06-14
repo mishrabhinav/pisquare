@@ -1,6 +1,6 @@
 #include "splash.h"
 
-#include "assets/splash.h"
+#include "assets/assets.h"
 #include "text.h"
 
 scene_t *splash_scene(void)
