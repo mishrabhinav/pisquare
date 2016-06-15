@@ -33,7 +33,6 @@ typedef struct {
 	color_t color;
 	int type;
 	int free;
-	float duration;
 } powerup_t;
 
 powerup_t *powerup_new(powerup_t *powerup);

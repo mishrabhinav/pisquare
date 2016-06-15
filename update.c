@@ -79,6 +79,9 @@ void update_player(game_state_t *state, player_t *player)
 	/* Timing */
 	player->timer_flash += state->delta;
 	player->timer_shoot += state->delta;
+	player->timer_powerup_bullets += state->delta;
+	player->timer_powerup_invincible += state->delta;
+	player->timer_powerup_tiny += state->delta;
 
 	/* Low-Life Flashing */
 	if (player->timer_flash > PLAYER_TIMER_FLASH)
@@ -119,16 +122,27 @@ void update_player(game_state_t *state, player_t *player)
 		player->entity->pos.y =
 				state->area.y - player->entity->size.y - 1;
 	}
-	/* Update Direction */
+
+	/* Correct Direction */
 	player->dir = 180
 		* atan2(player->entity->vel.y, player->entity->vel.x)/M_PI;
 
-	/* Powerups */
+	/* Powerup State */
+	if (player->powerup_bullets
+		&& player->timer_powerup_bullets > POWERUP_BULLETS_DURATION)
+		player->powerup_bullets = 0;
+	if (player->powerup_tiny
+		&& player->timer_powerup_tiny > POWERUP_TINY_DURATION)
+		player->powerup_tiny = 0;
+	if (player->powerup_invincible && player->timer_powerup_invincible
+						> POWERUP_INVINCIBLE_DURATION)
+		player->powerup_invincible = 0;
 
 	/* State Update */
-	player->normal = player->debounce_time > PLAYER_DEBOUNCE_TIME
-		&& !(player->powered
-			&& player->powerup_type == POWERUP_TYPE_INVINCIBLE);
+	player->powered = player->powerup_shield || player->powerup_bullets
+			|| player->powerup_invincible || player->powerup_tiny;
+
+	player->normal = player->debounce_time > PLAYER_DEBOUNCE_TIME;
 
 	/* IO */
 	int right = !RPI_GetGpioValue(player->right_pin);

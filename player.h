@@ -8,6 +8,7 @@
 #include "powerup.h"
 
 #define PLAYER_LIVES_DEFAULT 3
+#define PLAYER_LIVES_MAX 3
 #define PLAYER_SPEED_DEFAULT 80
 
 #define PLAYER_SPEED_INCREASE 100
@@ -38,27 +39,37 @@
 #define PLAYER_4_COLOR ((color_t){0, 150, 255, 255})
 
 typedef struct {
+	/* Motion */
 	entity_t *entity;
 	float dir; /* angle from x-axis in degrees */
 	float speed;
 	float angular_vel; /* angular velocity */
 
-	int lives;
 
 	/* Timing */
 	float debounce_time; /* invincibility after collision */
 	float timer_flash; /* counter for low-life flashing */
 	float timer_shoot; /* reload */
-	float timer_powerup;
-	float powerup_duration;
+	float timer_powerup_bullets;
+	float timer_powerup_invincible;
+	float timer_powerup_tiny;
+
+	/* State */
+	int lives;
 
 	/* Flags */
 	int normal; /* can be damaged */
-	int shoot; /* flag to shoot */
 	int powered; /* flag for powerups */
-	int powerup_type;
+	int shoot; /* flag to shoot */
+
+	int powerup_tiny;
+	int powerup_bullets;
+	int powerup_invincible;
+	int powerup_shield;
 
 	color_t color;
+
+	/* IO */
 	rpi_gpio_pin_t left_pin;
 	rpi_gpio_pin_t right_pin;
 } player_t;
