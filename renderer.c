@@ -67,6 +67,11 @@ void graphics_blank(const graphics_t *device)
 	dma_zero(device->mem, get_buf_size(device));
 }
 
+void graphics_background_color(const graphics_t *device, const color_t *color)
+{
+	dma_fill(device->mem, color, get_buf_size(device));
+}
+
 /* static color_t overrun; */
 static color_t *get_pixel(const graphics_t *device, size_t x, size_t y)
 {

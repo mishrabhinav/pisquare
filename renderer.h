@@ -23,6 +23,7 @@ typedef struct cvertex {
 
 graphics_t *graphics_create(size_t width, size_t height, size_t depth);
 void graphics_blank(const graphics_t *device);
+void graphics_background_color(const graphics_t *device, const color_t *color);
 void graphics_draw(const graphics_t *device,
 		   const cvertex_t *vertices, size_t len);
 void graphics_draw_rectangle(const graphics_t *device, const color_t *color,
