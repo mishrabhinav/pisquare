@@ -65,8 +65,8 @@ void player_injure(player_t *player)
 {
 	if (player->powerup_shield)
 		player->powerup_shield = 0;
-
-	--player->lives;
+	else
+		--player->lives;
 	player->debounce_time = 0;
 }
 
