@@ -117,6 +117,9 @@ void kernel_main(unsigned int r0, unsigned int r1, unsigned int atags)
 	game->next_scene = game_over;
 	game_over->next_scene = menu;
 
+	/* state configuration */
+	state.player_count = 1;
+
 	/* start at splash */
 	goto_scene(splash);
 

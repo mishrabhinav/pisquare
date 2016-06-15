@@ -20,7 +20,7 @@ scene_t *menu_scene(void)
 
 void menu_init(game_state_t *state)
 {
-	state->player_count = 1;
+	(void)state;
 }
 
 int menu_update(game_state_t *state)
