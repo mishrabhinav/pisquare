@@ -40,10 +40,10 @@ void draw_square(const game_state_t *state, vector2_t *pos, float width,
 	vs[2].color = *color;
 	vs[3].color = *color;
 
-	graphics_draw_line(state->device, &vs[1], &vs[0]);
+	graphics_draw_line(state->device, &vs[0], &vs[1]);
 	graphics_draw_line(state->device, &vs[1], &vs[2]);
 	graphics_draw_line(state->device, &vs[2], &vs[3]);
-	graphics_draw_line(state->device, &vs[0], &vs[3]);
+	graphics_draw_line(state->device, &vs[3], &vs[0]);
 
 	/* graphics_draw(state->device, vs, 6); */
 }
@@ -64,6 +64,12 @@ void draw_powerup(const game_state_t *state, const powerup_t *powerup)
 {
 	graphics_draw_rectangle(state->device, &powerup->color,
 			&powerup->entity->pos, &powerup->entity->size);
+	vector2_t pos = (vector2_t){powerup->entity->pos.x
+					+ powerup->entity->size.x/2,
+					powerup->entity->pos.y
+					+ powerup->entity->size.y/2};
+	draw_square(state, &pos, powerup->entity->size.x + 3,
+			360 * state->time/1.0f, &powerup->color);
 }
 
 void draw_player(const game_state_t *state, const player_t *player)
@@ -93,6 +99,17 @@ void draw_player(const game_state_t *state, const player_t *player)
 
 	graphics_draw_rectangle_dither(state->device, &player->color, &pos,
 							&size);
+
+	/* Powerup Effect */
+	if (player->powered) {
+		pos = (vector2_t){player->entity->pos.x
+						+ player->entity->size.x/2,
+						player->entity->pos.y
+						+ player->entity->size.y/2};
+		draw_square(state, &pos, player->entity->size.x + 3,
+				360 * state->time/0.5f, &player->color);
+	}
+
 
 	/* generate vertices */
 	/*cvertex_t vs[3];

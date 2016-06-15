@@ -43,6 +43,7 @@ player_t *player_new(int num, int player_count)
 	new->timer_flash = 0.f;
 	new->timer_shoot = 0.f;
 	new->timer_powerup_bullets = 0.f;
+	new->timer_powerup_bullets_delay = 0.f;
 	new->timer_powerup_invincible = 0.f;
 	new->timer_powerup_tiny = 0.f;
 

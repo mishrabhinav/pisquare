@@ -5,7 +5,8 @@
 #include "color.h"
 
 #define POWERUP_BULLETS_COLOR (color_t){0, 255, 255, 255}
-#define POWERUP_BULLETS_DURATION 3
+#define POWERUP_BULLETS_DURATION 4
+#define POWERUP_BULLETS_DELAY 0.15f
 
 #define POWERUP_LIFE_COLOR (color_t){0, 255, 255, 255}
 #define POWERUP_LIFE_DURATION 0

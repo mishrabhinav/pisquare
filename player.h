@@ -51,6 +51,7 @@ typedef struct {
 	float timer_flash; /* counter for low-life flashing */
 	float timer_shoot; /* reload */
 	float timer_powerup_bullets;
+	float timer_powerup_bullets_delay;
 	float timer_powerup_invincible;
 	float timer_powerup_tiny;
 
