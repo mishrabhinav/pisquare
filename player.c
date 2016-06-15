@@ -31,12 +31,11 @@ player_t *player_new(int num, int player_count)
 	/* State Flags */
 	new->normal = 1;
 	new->shoot = 0;
-	new->powered = 0;
 
 	/* Powerup Flags */
 	new->powerup_tiny = 0;
 	new->powerup_bullets = 0;
-	new->powerup_invincible = 0;
+	new->powerup_ghost = 0;
 	new->powerup_shield = 0;
 
 	/* Timers */
@@ -44,7 +43,7 @@ player_t *player_new(int num, int player_count)
 	new->timer_shoot = 0.f;
 	new->timer_powerup_bullets = 0.f;
 	new->timer_powerup_bullets_delay = 0.f;
-	new->timer_powerup_invincible = 0.f;
+	new->timer_powerup_ghost = 0.f;
 	new->timer_powerup_tiny = 0.f;
 
 	/* Color */
@@ -64,6 +63,9 @@ void player_rotate(player_t *player, float angle)
 
 void player_injure(player_t *player)
 {
+	if (player->powerup_shield)
+		player->powerup_shield = 0;
+
 	--player->lives;
 	player->debounce_time = 0;
 }
@@ -77,8 +79,11 @@ void player_shoot(player_t *player, bullet_t *bullet)
 					player->entity->pos.y
 				+ player->entity->size.y/2 - 2 + 15 * dir.y};
 
-	bullet->entity->vel = (vector2_t){4 * player->entity->vel.x,
-						4 * player->entity->vel.y};
+	bullet->entity->vel = (vector2_t){(10 + PLAYER_SPEED_MAX)
+		* player->entity->vel.x/fabs(player->entity->vel.x),
+				(10 + PLAYER_SPEED_MAX)
+		* player->entity->vel.y/fabs(player->entity->vel.x)};
+
 	bullet->dead = 0;
 	player->timer_shoot = 0;
 	player->shoot = 0;
@@ -104,9 +109,9 @@ void player_powerup(player_t *player, powerup_t *powerup)
 		player->powerup_tiny = 1;
 		player->timer_powerup_tiny = 0.f;
 		break;
-	case POWERUP_TYPE_INVINCIBLE:
-		player->powerup_invincible = 1;
-		player->timer_powerup_invincible = 0.f;
+	case POWERUP_TYPE_GHOST:
+		player->powerup_ghost = 1;
+		player->timer_powerup_ghost = 0.f;
 		break;
 	}
 }

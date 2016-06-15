@@ -43,14 +43,16 @@ void menu_draw(game_state_t *state)
 {
 	char player_num[8];
 
-	draw_background(state);
+	/* draw_background(state); */
+
+	color_t col = (color_t){0, 0, 0, 255};
+
+	graphics_background_color(state->device, &col);
 
 	print_text(state, "MENU",
 			&(vector2_t){221, 161});
 	print_text(state, "L : SELECT    R : START",
 			&(vector2_t){36, 484});
-
-	color_t col;
 
 	for (int i = 0; i < 4; i++) {
 		col = player_number_color(i + 1);

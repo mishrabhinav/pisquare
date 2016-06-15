@@ -75,7 +75,10 @@ void draw_powerup(const game_state_t *state, const powerup_t *powerup)
 void draw_player(const game_state_t *state, const player_t *player)
 {
 	/* Player */
-	if (player->debounce_time > PLAYER_DEBOUNCE_TIME)
+	if (player->powerup_ghost)
+		graphics_draw_rectangle_dither(state->device, &player->color,
+				&player->entity->pos, &player->entity->size);
+	else if (player->normal)
 		graphics_draw_rectangle(state->device, &player->color,
 				&player->entity->pos, &player->entity->size);
 	else
@@ -101,13 +104,26 @@ void draw_player(const game_state_t *state, const player_t *player)
 							&size);
 
 	/* Powerup Effect */
-	if (player->powered) {
-		pos = (vector2_t){player->entity->pos.x
-						+ player->entity->size.x/2,
-						player->entity->pos.y
-						+ player->entity->size.y/2};
-		draw_square(state, &pos, player->entity->size.x + 3,
-				360 * state->time/0.5f, &player->color);
+	/*
+	*if (player->powerup_bullets) {
+	*	pos = (vector2_t){player->entity->pos.x
+	*					+ player->entity->size.x/2,
+	*					player->entity->pos.y
+	*					+ player->entity->size.y/2};
+	*	draw_square(state, &pos, player->entity->size.x + 3,
+	*			360 * state->time/0.5f, &player->color);
+	*}
+	*/
+
+	/* Shield */
+	if (player->powerup_shield) {
+		vector2_t pos = (vector2_t){player->entity->pos.x - 1,
+						player->entity->pos.y - 1};
+		vector2_t size = (vector2_t){player->entity->size.x + 2,
+						player->entity->size.y + 2};
+
+		graphics_draw_rectangle_outline(state->device,
+			&(color_t){255, 255, 255, 255}, &pos, &size);
 	}
 
 

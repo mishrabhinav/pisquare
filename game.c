@@ -54,13 +54,18 @@ static bullet_t *add_bullet(game_state_t *state)
 
 static powerup_t *add_powerup(game_state_t *state)
 {
+	int new_type = random_int(POWERUP_TYPE_NONE);
+
 	for (int i = 0; i < state->powerups_count; i++)
-		if (state->powerups[i].free)
+		if (state->powerups[i].free) {
+			powerup_set_type(&state->powerups[i], new_type);
 			return &state->powerups[i];
+	}
 
 	powerup_t *powerup = &state->powerups[state->powerups_count];
 
 	powerup_new(powerup);
+	powerup_set_type(powerup, new_type);
 
 	++state->powerups_count;
 
@@ -229,8 +234,9 @@ int game_update(game_state_t *state)
 
 			/* Box collisions */
 			for (int j = 0; j < state->boxes_count; j++) {
-				if (state->player[i].normal &&
-					collides(state->player[i].entity,
+				if (state->player[i].normal
+					&& !state->player[i].powerup_ghost
+					&& collides(state->player[i].entity,
 						state->boxes[j].entity)) {
 					regenerate_box(state, &state->boxes[j]);
 					player_injure(&state->player[i]);

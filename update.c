@@ -81,7 +81,7 @@ void update_player(game_state_t *state, player_t *player)
 	player->timer_shoot += state->delta;
 	player->timer_powerup_bullets += state->delta;
 	player->timer_powerup_bullets_delay += state->delta;
-	player->timer_powerup_invincible += state->delta;
+	player->timer_powerup_ghost += state->delta;
 	player->timer_powerup_tiny += state->delta;
 
 	/* Low-Life Flashing */
@@ -135,9 +135,9 @@ void update_player(game_state_t *state, player_t *player)
 	if (player->powerup_tiny
 		&& player->timer_powerup_tiny > POWERUP_TINY_DURATION)
 		player->powerup_tiny = 0;
-	if (player->powerup_invincible && player->timer_powerup_invincible
-						> POWERUP_INVINCIBLE_DURATION)
-		player->powerup_invincible = 0;
+	if (player->powerup_ghost && player->timer_powerup_ghost
+						> POWERUP_GHOST_DURATION)
+		player->powerup_ghost = 0;
 
 	/* Powerup Effects */
 	if (player->powerup_bullets
@@ -148,9 +148,6 @@ void update_player(game_state_t *state, player_t *player)
 	}
 
 	/* State Update */
-	player->powered = player->powerup_shield || player->powerup_bullets
-			|| player->powerup_invincible || player->powerup_tiny;
-
 	player->normal = player->debounce_time > PLAYER_DEBOUNCE_TIME;
 
 	/* IO */

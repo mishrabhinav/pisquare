@@ -9,9 +9,10 @@
 
 #define PLAYER_LIVES_DEFAULT 3
 #define PLAYER_LIVES_MAX 3
-#define PLAYER_SPEED_DEFAULT 80
 
+#define PLAYER_SPEED_DEFAULT 80
 #define PLAYER_SPEED_INCREASE 100
+#define PLAYER_SPEED_MAX (PLAYER_SPEED_DEFAULT + PLAYER_SPEED_INCREASE)
 #define PLAYER_SPEED_ANGULAR 300
 #define PLAYER_SIZE_DEFAULT 12
 
@@ -52,7 +53,7 @@ typedef struct {
 	float timer_shoot; /* reload */
 	float timer_powerup_bullets;
 	float timer_powerup_bullets_delay;
-	float timer_powerup_invincible;
+	float timer_powerup_ghost;
 	float timer_powerup_tiny;
 
 	/* State */
@@ -60,12 +61,11 @@ typedef struct {
 
 	/* Flags */
 	int normal; /* can be damaged */
-	int powered; /* flag for powerups */
 	int shoot; /* flag to shoot */
 
 	int powerup_tiny;
 	int powerup_bullets;
-	int powerup_invincible;
+	int powerup_ghost;
 	int powerup_shield;
 
 	color_t color;
