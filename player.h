@@ -6,22 +6,25 @@
 #include "libarmc/rpi-gpio.h"
 #include "bullet.h"
 #include "powerup.h"
+#include "renderer.h"
 
 #define PLAYER_LIVES_DEFAULT 3
 #define PLAYER_LIVES_MAX 3
 
-#define PLAYER_SPEED_DEFAULT 80
+#define PLAYER_SPEED_DEFAULT 120
 #define PLAYER_SPEED_INCREASE 40
 #define PLAYER_SPEED_MAX (PLAYER_SPEED_DEFAULT + PLAYER_SPEED_INCREASE)
-#define PLAYER_SPEED_ANGULAR 300
+#define PLAYER_SPEED_ANGULAR 320
 #define PLAYER_SIZE_DEFAULT 12
 #define PLAYER_SIZE_TINY 6
+
+#define PLAYER_TRAIL_SEGMENTS 9
 
 #define PLAYER_DIRECTION_DEFAULT 90
 
 #define PLAYER_DEBOUNCE_TIME 1.5f
 #define PLAYER_TIMER_FLASH 0.3f
-#define PLAYER_TIMER_SHOOT 1.0f
+#define PLAYER_TIMER_SHOOT 0.8f
 #define PLAYER_OFFSET_START 200
 
 #define PLAYER_1_RIGHT RPI_GPIO4
@@ -46,7 +49,8 @@ typedef struct {
 	float dir; /* angle from x-axis in degrees */
 	float speed;
 	float angular_vel; /* angular velocity */
-
+	cvertex_t *trail; /* motion trail */
+	int trail_toggle;
 
 	/* Timing */
 	float debounce_time; /* invincibility after collision */

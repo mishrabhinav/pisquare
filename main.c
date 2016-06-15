@@ -112,7 +112,7 @@ void kernel_main(unsigned int r0, unsigned int r1, unsigned int atags)
 	game_over = game_over_scene();
 
 	splash->next_scene = menu;
-	menu->next_scene = game;
+	menu->next_scene = menu_players;
 	menu_players->next_scene = game;
 	game->next_scene = game_over;
 	game_over->next_scene = menu;

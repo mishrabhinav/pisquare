@@ -3,6 +3,7 @@
 #include <math.h>
 
 #include "random.h"
+#include "color.h"
 
 void update_entity(game_state_t *state, entity_t *ent)
 {
@@ -60,7 +61,7 @@ void regenerate_box(game_state_t *state, box_t *box)
 	int posy = up * (-box->entity->size.y + !forward * (state->area.y
 						+ box->entity->size.y))
 						+ !up * randy;
-	int rand_size = 6 + random_int(7);
+	int rand_size = BOX_SIZE_DEFAULT + random_int(BOX_SIZE_VARIANCE);
 	int grey = random_int(128) + 128;
 
 	box->entity->size = (vector2_t){rand_size, rand_size};
@@ -127,6 +128,19 @@ void update_player(game_state_t *state, player_t *player)
 	/* Correct Direction */
 	player->dir = 180
 		* atan2(player->entity->vel.y, player->entity->vel.x)/M_PI;
+
+	/* Motion Trail */
+	/* Shift and recolor */
+	if (player->trail_toggle) {
+		for (int i = PLAYER_TRAIL_SEGMENTS-1; i > 0; i--)
+			player->trail[i] = player->trail[i-1];
+		player->trail[0] = (cvertex_t){{player->entity->pos.x
+						+ player->entity->size.x/2,
+						player->entity->pos.y
+						+ player->entity->size.y/2},
+								player->color};
+	}
+	player->trail_toggle = !player->trail_toggle;
 
 	/* Powerup State */
 	if (player->powerup_bullets

@@ -17,6 +17,12 @@ player_t *player_new(int num, int player_count)
 {
 	player_t *new = malloc(sizeof(player_t));
 
+	new->trail = malloc(PLAYER_TRAIL_SEGMENTS * sizeof(cvertex_t));
+	new->trail_toggle = 1;
+
+	for (int i = 0; i < PLAYER_TRAIL_SEGMENTS; i++)
+		new->trail[i] = (cvertex_t){{0, 0}, {255, 255, 255, 255} };
+
 	new->entity = entity_new();
 	new->entity->size = (vector2_t){PLAYER_SIZE_DEFAULT,
 							PLAYER_SIZE_DEFAULT};

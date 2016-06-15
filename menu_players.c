@@ -4,6 +4,7 @@
 
 #include "draw.h"
 #include "text.h"
+#include "io.h"
 
 scene_t *menu_players_scene(void)
 {
@@ -23,7 +24,11 @@ void menu_players_init(game_state_t *state)
 
 int menu_players_update(game_state_t *state)
 {
-	return state->time < 2.0f;
+	if (state->p1_right_clicked) {
+		io_handle_click_right(state);
+		return 0;
+	}
+	return 1;
 }
 
 void menu_players_draw(game_state_t *state)
@@ -45,4 +50,7 @@ void menu_players_draw(game_state_t *state)
 
 		draw_rect(state, &rect, &col);
 	}
+
+	print_text(state, "R : CONTINUE",
+			&(vector2_t){120, 484});
 }

@@ -74,6 +74,11 @@ void draw_powerup(const game_state_t *state, const powerup_t *powerup)
 
 void draw_player(const game_state_t *state, const player_t *player)
 {
+	/* Motion Trail */
+	for (int i = 0; i < PLAYER_TRAIL_SEGMENTS - 1; i++)
+		if (player->trail[i+1].pos.x > 0)
+			graphics_draw_line(state->device, &player->trail[i],
+							&player->trail[i + 1]);
 	/* Player */
 	if (player->powerup_ghost)
 		graphics_draw_rectangle_dither(state->device, &player->color,

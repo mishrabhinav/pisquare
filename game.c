@@ -110,7 +110,7 @@ static void print_fps(game_state_t *state)
 {
 	char str[2];
 
-	sprintf(str, "%d", state->bullets_count);
+	sprintf(str, "%d", state->fps);
 	print_text_color(state, str, &(vector2_t){320, 486},
 			 &(color_t){0, 255, 0, 255});
 }
@@ -123,6 +123,9 @@ void game_init(game_state_t *state)
 				  state->device->height - 32};
 
 	/* Boxes */
+	for (int i = 0; i < 4; i++)
+		add_box(state);
+
 	state->boxes_count = 0;
 
 	/* Bullets */
@@ -264,6 +267,7 @@ int game_update(game_state_t *state)
 			for (int j = 0; j < state->player_count; j++) {
 				if (state->player[j].lives > 0
 					&& state->player[j].normal
+					&& !state->player[j].powerup_ghost
 					&& collides(state->player[j].entity,
 						state->bullets[i].entity)) {
 					player_injure(&state->player[j]);
