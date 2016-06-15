@@ -205,13 +205,14 @@ int game_update(game_state_t *state)
 		if (state->powerups_count < POWERUP_COUNT_MAX) {
 			powerup_t *powerup = add_powerup(state);
 			/* Position */
+			powerup->free = 0;
 			powerup->entity->pos = (vector2_t){
 			random_int(state->area.x - powerup->entity->size.x),
 			random_int(state->area.y - powerup->entity->size.y)};
 		}
 	}
 
-	/* Player */
+	/* Players */
 	for (int i = 0; i < state->player_count; i++) {
 		if (state->player[i].lives > 0) {
 			update_player(state, &state->player[i]);
