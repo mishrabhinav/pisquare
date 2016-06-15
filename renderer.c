@@ -447,6 +447,11 @@ void graphics_draw_line(const graphics_t *device,
 	}
 }
 
+void graphics_redraw(const graphics_t *device)
+{
+	dma_copy(device->mem, device->fb, get_buf_size(device));
+}
+
 void graphics_flush(graphics_t *device)
 {
 	uint8_t *tmp;

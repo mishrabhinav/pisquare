@@ -36,6 +36,7 @@ void graphics_draw_image(const graphics_t *device, const vector2_t *pos,
 			 const unsigned char *image, const color_t *tint);
 void graphics_draw_line(const graphics_t *device,
 			const cvertex_t *v1, const cvertex_t *v2);
+void graphics_redraw(const graphics_t *device);
 void graphics_flush(graphics_t *device);
 
 #endif
