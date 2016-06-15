@@ -140,15 +140,14 @@ void kernel_main(unsigned int r0, unsigned int r1, unsigned int atags)
 		/* update */
 		proceed = scene->update(&state);
 
+		/* perform scene transitions */
+		if (!proceed)
+			goto_scene(scene->next_scene);
 		/* draw */
 		scene->draw(&state);
 
 		/* write full frame */
 		graphics_flush(state.device);
-
-		/* perform scene transitions */
-		if (!proceed)
-			goto_scene(scene->next_scene);
 	}
 
 	draw_background(&state);

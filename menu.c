@@ -69,6 +69,6 @@ void menu_draw(game_state_t *state)
 		&(vector2_t){181, 201 + 30 * (state->player_count - 1)}, &col);
 
 	draw_square(state,
-		&(vector2_t){160, 208 + 30 * (state->player_count - 1)},
+		&(vector2_t){160, 210 + 30 * (state->player_count - 1)},
 				14, (int)(360 * state->time/2.f) % 90, &col);
 }

@@ -43,7 +43,7 @@ void game_over_draw(game_state_t *state)
 
 	banner = (rect_t){{0, state->area.y}, {state->area.x, 32} };
 	draw_rect(state, &banner, &col);
-	
+
 	print_text(state, "GAME OVER", &(vector2_t){165, 181});
 
 	char str[16];
