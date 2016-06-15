@@ -61,6 +61,15 @@ void player_rotate(player_t *player, float angle)
 	player->dir = fmodf(player->dir + angle, 360);
 }
 
+void player_resize(player_t *player, float width)
+{
+	player->entity->pos = (vector2_t){player->entity->pos.x
+					+ player->entity->size.x/2 - width/2,
+					player->entity->pos.y
+					+ player->entity->size.y/2 - width/2};
+	player->entity->size = (vector2_t){width, width};
+}
+
 void player_injure(player_t *player)
 {
 	if (player->powerup_shield)
@@ -79,10 +88,12 @@ void player_shoot(player_t *player, bullet_t *bullet)
 					player->entity->pos.y
 				+ player->entity->size.y/2 - 2 + 15 * dir.y};
 
+	float mag = sqrtf(fabsf(player->entity->vel.x * player->entity->vel.x
+			+ player->entity->vel.y * player->entity->vel.y));
 	bullet->entity->vel = (vector2_t){(10 + PLAYER_SPEED_MAX)
-		* player->entity->vel.x/fabs(player->entity->vel.x),
-				(10 + PLAYER_SPEED_MAX)
-		* player->entity->vel.y/fabs(player->entity->vel.x)};
+						* player->entity->vel.x/mag,
+					(10 + PLAYER_SPEED_MAX)
+						* player->entity->vel.y/mag};
 
 	bullet->dead = 0;
 	player->timer_shoot = 0;

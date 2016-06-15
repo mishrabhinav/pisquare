@@ -140,12 +140,18 @@ void update_player(game_state_t *state, player_t *player)
 		player->powerup_ghost = 0;
 
 	/* Powerup Effects */
+	/* Bullets */
 	if (player->powerup_bullets
 		&& player->timer_powerup_bullets_delay
 		> POWERUP_BULLETS_DELAY) {
 		player->shoot = 1;
 		player->timer_powerup_bullets_delay = 0.f;
 	}
+	/* Sizing */
+	if (player->powerup_tiny)
+		player_resize(player, PLAYER_SIZE_TINY);
+	else
+		player_resize(player, PLAYER_SIZE_DEFAULT);
 
 	/* State Update */
 	player->normal = player->debounce_time > PLAYER_DEBOUNCE_TIME;

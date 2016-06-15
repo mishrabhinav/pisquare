@@ -43,11 +43,11 @@ void menu_draw(game_state_t *state)
 {
 	char player_num[8];
 
-	/* draw_background(state); */
+	draw_background(state);
 
 	color_t col = (color_t){0, 0, 0, 255};
 
-	graphics_background_color(state->device, &col);
+	/* graphics_background_color(state->device, &col); */
 
 	print_text(state, "MENU",
 			&(vector2_t){221, 161});

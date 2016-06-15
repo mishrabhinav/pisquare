@@ -7,11 +7,11 @@
 #include "bullet.h"
 #include "powerup.h"
 
-#define BOX_SPAWN_TIMER 1.0f
-#define BOX_COUNT_MAX 50
+#define BOX_SPAWN_TIMER 2.f
+#define BOX_COUNT_MAX 40
 
-#define POWERUP_SPAWN_TIME_DEFAULT 2
-#define POWERUP_SPAWN_TIME_VARIANCE 3
+#define POWERUP_SPAWN_TIME_DEFAULT 8
+#define POWERUP_SPAWN_TIME_VARIANCE 6
 
 #define POWERUP_COUNT_MAX 10
 

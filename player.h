@@ -15,6 +15,7 @@
 #define PLAYER_SPEED_MAX (PLAYER_SPEED_DEFAULT + PLAYER_SPEED_INCREASE)
 #define PLAYER_SPEED_ANGULAR 300
 #define PLAYER_SIZE_DEFAULT 12
+#define PLAYER_SIZE_TINY 6
 
 #define PLAYER_DIRECTION_DEFAULT 90
 
@@ -61,7 +62,7 @@ typedef struct {
 
 	/* Flags */
 	int normal; /* can be damaged */
-	int shoot; /* flag to shoot */
+	int shoot; /* request bullet */
 
 	int powerup_tiny;
 	int powerup_bullets;
@@ -76,11 +77,14 @@ typedef struct {
 } player_t;
 
 player_t *player_new(int num, int player_count);
+
 void player_rotate(player_t *player, float angle);
 void player_injure(player_t *player);
 void player_free(player_t *player);
 void player_shoot(player_t *player, bullet_t *bullet);
 void player_powerup(player_t *player, powerup_t *powerup);
+void player_resize(player_t *player, float width);
+
 vector2_t player_direction_vector(const player_t *player);
 color_t player_number_color(int num);
 rpi_gpio_pin_t player_number_right_pin(int player);
