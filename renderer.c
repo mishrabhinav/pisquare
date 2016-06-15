@@ -423,10 +423,10 @@ void graphics_draw_line(const graphics_t *device,
 	dx = v2->pos.x - v1->pos.x;
 	dy = v2->pos.y - v1->pos.y;
 
-	if (dx > dy)
-		steps = (int)dx;
+	if (fabsf(dx) > fabsf(dy))
+		steps = (int)fabsf(dx);
 	else
-		steps = (int)dy;
+		steps = (int)fabsf(dy);
 
 	xinc = dx / steps;
 	yinc = dy / steps;
