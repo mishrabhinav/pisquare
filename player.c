@@ -3,89 +3,46 @@
 #include <stdlib.h>
 #include <math.h>
 
-player_t *player_new(void)
+static float player_number_dir(int player, int player_count)
+{
+	if (player_count == 1)
+		return PLAYER_DIRECTION_DEFAULT;
+	else if (player_count > 2)
+		return 315 - 90 * (player - 1);
+	else
+		return 315 - 180 * (player - 1);
+}
+
+player_t *player_new(int num, int player_count)
 {
 	player_t *new = malloc(sizeof(player_t));
 
 	new->entity = entity_new();
-	new->entity->size = (vector2_t){PLAYER_DEFAULT_SIZE,
-							PLAYER_DEFAULT_SIZE};
-	new->lives = PLAYER_DEFAULT_LIVES;
-	new->dir = PLAYER_DEFAULT_DIRECTION;
-	new->speed = PLAYER_DEFAULT_SPEED;
+	new->entity->size = (vector2_t){PLAYER_SIZE_DEFAULT,
+							PLAYER_SIZE_DEFAULT};
+	new->lives = PLAYER_LIVES_DEFAULT;
+	new->dir = player_number_dir(num, player_count);
+	new->speed = PLAYER_SPEED_DEFAULT;
 	new->debounce_time = PLAYER_DEBOUNCE_TIME;
 
+	new->entity->pos = (vector2_t){0, 0};
 	new->shoot = 0;
+	new->powered = 0;
+	new->powerup_type = 0;
 	new->angular_vel = 0;
 	new->timer_flash = 0.f;
 	new->timer_shoot = 0.f;
-	new->color = (color_t){255, 255, 255, 255};
+	new->timer_powerup = 0.f;
+	new->powerup_duration = 0.f;
+
+	/* Color */
+	new->color = player_number_color(num);
+
+	/* Input Pin Assignment */
+	new->right_pin = player_number_right_pin(num);
+	new->left_pin = player_number_left_pin(num);
 
 	return new;
-}
-
-rpi_gpio_pin_t get_left_pin(int player)
-{
-	switch (player) {
-	case 1:
-		return PLAYER_1_LEFT;
-	case 2:
-		return PLAYER_2_LEFT;
-	case 3:
-		return PLAYER_3_LEFT;
-	case 4:
-		return PLAYER_4_LEFT;
-	default:
-		return PLAYER_1_LEFT;
-	}
-}
-
-rpi_gpio_pin_t get_right_pin(int player)
-{
-	switch (player) {
-	case 1:
-		return PLAYER_1_RIGHT;
-	case 2:
-		return PLAYER_2_RIGHT;
-	case 3:
-		return PLAYER_3_RIGHT;
-	case 4:
-		return PLAYER_4_RIGHT;
-	default:
-		return PLAYER_1_RIGHT;
-	}
-}
-
-vector2_t get_pos(int player)
-{
-	switch (player) {
-	case 1:
-		return PLAYER_1_POS;
-	case 2:
-		return PLAYER_2_POS;
-	case 3:
-		return PLAYER_3_POS;
-	case 4:
-		return PLAYER_4_POS;
-	default:
-		return PLAYER_1_POS;
-	}
-}
-
-color_t get_color(int player)
-{
-	switch (player) {
-	case 1:
-		return PLAYER_1_COLOR;
-	case 2:
-		return PLAYER_2_COLOR;
-	case 3:
-		return PLAYER_3_COLOR;
-	case 4:
-		return PLAYER_4_COLOR;
-	default:
-		return PLAYER_1_COLOR;
-	}
 }
 
 void player_rotate(player_t *player, float angle)
@@ -101,18 +58,80 @@ void player_injure(player_t *player)
 
 void player_shoot(player_t *player, bullet_t *bullet)
 {
+	vector2_t dir = player_direction_vector(player);
+
 	bullet->entity->pos = (vector2_t){player->entity->pos.x
-				+ player->entity->size.x/2 - 2
-				+ 15 * cosf((float)M_PI * player->dir/180.f),
+				+ player->entity->size.x/2 - 2 + 15 * dir.x,
 					player->entity->pos.y
-				+ player->entity->size.y/2 - 2
-				+ 15 * sinf((float)M_PI * player->dir/180.f)};
+				+ player->entity->size.y/2 - 2 + 15 * dir.y};
 
 	bullet->entity->vel = (vector2_t){4 * player->entity->vel.x,
 						4 * player->entity->vel.y};
 	bullet->dead = 0;
 	player->timer_shoot = 0;
 	player->shoot = 0;
+}
+
+void player_powerup(player_t *player, powerup_t *powerup)
+{
+	powerup->free = 1;
+	/* do something cool! */
+	(void)player;
+}
+
+vector2_t player_direction_vector(const player_t *player)
+{
+	return (vector2_t){cosf((float)M_PI * player->dir/180.f),
+					sinf((float)M_PI * player->dir/180.f)};
+}
+
+rpi_gpio_pin_t player_number_left_pin(int player)
+{
+	switch (player) {
+	case 1:
+		return PLAYER_1_LEFT;
+	case 2:
+		return PLAYER_2_LEFT;
+	case 3:
+		return PLAYER_3_LEFT;
+	case 4:
+		return PLAYER_4_LEFT;
+	default:
+		return PLAYER_1_LEFT;
+	}
+}
+
+rpi_gpio_pin_t player_number_right_pin(int player)
+{
+	switch (player) {
+	case 1:
+		return PLAYER_1_RIGHT;
+	case 2:
+		return PLAYER_2_RIGHT;
+	case 3:
+		return PLAYER_3_RIGHT;
+	case 4:
+		return PLAYER_4_RIGHT;
+	default:
+		return PLAYER_1_RIGHT;
+	}
+}
+
+
+color_t player_number_color(int player)
+{
+	switch (player) {
+	case 1:
+		return PLAYER_1_COLOR;
+	case 2:
+		return PLAYER_2_COLOR;
+	case 3:
+		return PLAYER_3_COLOR;
+	case 4:
+		return PLAYER_4_COLOR;
+	default:
+		return PLAYER_1_COLOR;
+	}
 }
 
 void player_free(player_t *player)

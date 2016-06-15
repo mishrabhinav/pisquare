@@ -53,22 +53,22 @@ void menu_draw(game_state_t *state)
 	color_t col;
 
 	for (int i = 0; i < 4; i++) {
-		col = get_color(i + 1);
+		col = player_number_color(i + 1);
 		sprintf(player_num, "%d PLAYER", i + 1);
 		print_text_color(state, player_num,
 				&(vector2_t){181, 201 + 30 * i},
 					&(color_t){255, 255, 255, 255});
 	}
 
-	col = get_color(state->player_count);
+	col = player_number_color(state->player_count);
 
 	sprintf(player_num, "%d PLAYER", state->player_count);
 	print_text_color(state, player_num,
 		&(vector2_t){181, 201 + 30 * (state->player_count - 1)}, &col);
 
 	cvertex_t v1 = (cvertex_t){{50, 100}, {0, 0, 255, 255} };
-	cvertex_t v2 = (cvertex_t){{100, 100}, {0, 0, 255, 255} };
-	cvertex_t v3 = (cvertex_t){{100, 110}, {0, 255, 0, 255} };
+	cvertex_t v2 = (cvertex_t){{100, 105}, {0, 0, 255, 255} };
+	cvertex_t v3 = (cvertex_t){{100, 115}, {0, 255, 0, 255} };
 	cvertex_t v4 = (cvertex_t){{50, 110}, {0, 255, 0, 255} };
 
 	graphics_draw_line(state->device, &v1, &v2);

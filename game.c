@@ -52,6 +52,21 @@ static bullet_t *add_bullet(game_state_t *state)
 	return bullet;
 }
 
+static powerup_t *add_powerup(game_state_t *state)
+{
+	for (int i = 0; i < state->powerups_count; i++)
+		if (state->powerups[i].free)
+			return &state->powerups[i];
+
+	powerup_t *powerup = &state->powerups[state->powerups_count];
+
+	powerup_new(powerup);
+
+	++state->powerups_count;
+
+	return powerup;
+}
+
 static int collides(entity_t *e1, entity_t *e2)
 {
 	if (e1->pos.x < e2->pos.x + e2->size.x
@@ -109,14 +124,28 @@ void game_init(game_state_t *state)
 	state->bullets_count = 0;
 	state->bullets = malloc(BULLET_COUNT_MAX * sizeof(bullet_t));
 
+	/* powerups */
+	state->powerups_count = 0;
+	state->powerups = malloc(POWERUP_COUNT_MAX * sizeof(powerup_t));
+	state->powerup_wait = POWERUP_SPAWN_TIME_DEFAULT;
+
 	/* player */
 	for (int i = 0; i < state->player_count; i++) {
-		player_t *player = player_new();
+		player_t *player = player_new(i + 1, state->player_count);
+		vector2_t dir = player_direction_vector(player);
 
-		player->entity->pos = get_pos(i+1);
-		player->color = get_color(i + 1);
-		player->right_pin = get_right_pin(i + 1);
-		player->left_pin = get_left_pin(i + 1);
+		/* Position */
+		if (state->player_count == 1)
+			player->entity->pos = (vector2_t){state->area.x/2
+				- PLAYER_SIZE_DEFAULT/2, state->area.y/2
+						- PLAYER_SIZE_DEFAULT/2};
+		else
+			player->entity->pos = (vector2_t){state->area.x/2
+						- PLAYER_OFFSET_START * dir.x
+						- PLAYER_SIZE_DEFAULT/2,
+					state->area.y/2
+						- PLAYER_OFFSET_START * dir.y
+						- PLAYER_SIZE_DEFAULT/2};
 
 		RPI_SetGpioInput(player->right_pin);
 		RPI_SetGpioInput(player->left_pin);
@@ -124,13 +153,11 @@ void game_init(game_state_t *state)
 		state->player[i] = *player;
 	}
 
-	for (int i = 0; i < BOX_COUNT_MAX/8; i++)
-		add_box(state);
-
 	/* timers */
 	state->timer_box = 0;
 	state->timer_game = 0;
 	state->timer_frame = 0;
+	state->timer_powerup = 0;
 }
 
 int game_update(game_state_t *state)
@@ -139,6 +166,13 @@ int game_update(game_state_t *state)
 	state->timer_game += state->delta;
 	state->timer_box += state->delta;
 	state->timer_frame += state->delta;
+	state->timer_powerup += state->delta;
+
+	/* Difficulty */
+	if (state->timer_game >= MAX_DIFFICULTY_TIME)
+		state->difficulty = 1.f;
+	else
+		state->difficulty = state->timer_game/MAX_DIFFICULTY_TIME;
 
 	/* Diagnostics */
 	if (state->timer_frame >= 1.f) {
@@ -149,7 +183,7 @@ int game_update(game_state_t *state)
 
 	/* Boxes */
 	/* Increase number of boxes over time */
-	if (state->timer_box > BOX_TIMER
+	if (state->timer_box > BOX_SPAWN_TIMER
 				&& state->boxes_count < BOX_COUNT_MAX) {
 		state->timer_box = 0;
 		add_box(state);
@@ -163,6 +197,20 @@ int game_update(game_state_t *state)
 		if (!state->bullets[i].dead)
 			update_bullet(state, &state->bullets[i]);
 
+	/* Powerups */
+	if (state->timer_powerup > state->powerup_wait) {
+		state->timer_powerup = 0;
+		state->powerup_wait = POWERUP_SPAWN_TIME_DEFAULT
+			+ random_int(POWERUP_SPAWN_TIME_VARIANCE);
+		if (state->powerups_count < POWERUP_COUNT_MAX) {
+			powerup_t *powerup = add_powerup(state);
+			/* Position */
+			powerup->entity->pos = (vector2_t){
+			random_int(state->area.x - powerup->entity->size.x),
+			random_int(state->area.y - powerup->entity->size.y)};
+		}
+	}
+
 	/* Player */
 	for (int i = 0; i < state->player_count; i++) {
 		if (state->player[i].lives > 0) {
@@ -175,7 +223,7 @@ int game_update(game_state_t *state)
 	}
 
 	/* Collision Detection */
-	/* Players with boxes */
+	/* Players with boxes, powerups */
 	for (int j = 0; j < state->player_count; j++) {
 		if (state->player[j].lives > 0
 				&& state->player[j].debounce_time
@@ -186,6 +234,15 @@ int game_update(game_state_t *state)
 						state->boxes[i].entity)) {
 					regenerate_box(state, &state->boxes[i]);
 					player_injure(&state->player[j]);
+				}
+			}
+
+			/* Powerups */
+			for (int i = 0; i < state->powerups_count; i++) {
+				if (collides(state->player[j].entity,
+						state->powerups[i].entity)) {
+					player_powerup(&state->player[j],
+							&state->powerups[i]);
 				}
 			}
 		}
@@ -239,6 +296,10 @@ void game_draw(game_state_t *state)
 	for (int i = 0; i < state->bullets_count; i++)
 		if (!state->bullets[i].dead)
 			draw_bullet(state, &state->bullets[i]);
+	/* powerups */
+	for (int i = 0; i < state->powerups_count; i++)
+		if (!state->powerups[i].free)
+			draw_powerup(state, &state->powerups[i]);
 
 	/* player */
 	for (int i = 0; i < state->player_count; i++)

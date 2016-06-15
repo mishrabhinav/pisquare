@@ -48,7 +48,7 @@ void game_over_draw(game_state_t *state)
 
 		for (int i = 0; i < state->player_count; i++)
 			if (state->player[i].lives > 0) {
-				col = get_color(i + 1);
+				col = player_number_color(i + 1);
 				sprintf(str, "PLAYER %i WINS!", i + 1);
 			}
 		print_text_color(state, str, &(vector2_t){136, 231}, &col);

@@ -60,8 +60,15 @@ void draw_bullet(const game_state_t *state, const bullet_t *bullet)
 			&bullet->entity->pos, &bullet->entity->size);
 }
 
+void draw_powerup(const game_state_t *state, const powerup_t *powerup)
+{
+	graphics_draw_rectangle(state->device, &powerup->color,
+			&powerup->entity->pos, &powerup->entity->size);
+}
+
 void draw_player(const game_state_t *state, const player_t *player)
 {
+	/* Player */
 	if (player->debounce_time > PLAYER_DEBOUNCE_TIME)
 		graphics_draw_rectangle(state->device, &player->color,
 				&player->entity->pos, &player->entity->size);
@@ -69,19 +76,20 @@ void draw_player(const game_state_t *state, const player_t *player)
 		graphics_draw_rectangle_outline(state->device, &player->color,
 				&player->entity->pos, &player->entity->size);
 
-	vector2_t pos = (vector2_t){player->entity->pos.x
-				+ player->entity->size.x/2 - 3
-				+ 15 * cosf((float)M_PI * player->dir/180.f),
-					player->entity->pos.y
-				+ player->entity->size.y/2 - 3
-				+ 15 * sinf((float)M_PI * player->dir/180.f)};
-
-	vector2_t size = (vector2_t){6, 6};
-
+	/* Low-Life Flashing */
 	if (player->lives == 1 && player->timer_flash < PLAYER_TIMER_FLASH/2)
 		graphics_draw_rectangle_outline(state->device,
 			&(color_t){0, 0, 255, 255}, &player->entity->pos,
 							&player->entity->size);
+
+	/* Direction Pointer */
+	vector2_t dir = player_direction_vector(player);
+	vector2_t pos = (vector2_t){player->entity->pos.x
+				+ player->entity->size.x/2 - 3 + 15 * dir.x,
+					player->entity->pos.y
+				+ player->entity->size.y/2 - 3 + 15 * dir.y};
+
+	vector2_t size = (vector2_t){6, 6};
 
 	graphics_draw_rectangle_dither(state->device, &player->color, &pos,
 							&size);

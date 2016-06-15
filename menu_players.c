@@ -41,7 +41,7 @@ void menu_players_draw(game_state_t *state)
 		rect_t rect = {(vector2_t){156, 160 + (i + 1) * 30},
 						(vector2_t){20, 20} };
 
-		color_t col = get_color(i + 1);
+		color_t col = player_number_color(i + 1);
 
 		draw_rect(state, &rect, &col);
 	}

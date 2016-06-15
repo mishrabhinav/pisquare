@@ -24,6 +24,9 @@ void draw_box(const game_state_t *state, const box_t *box);
 /* Bullet */
 void draw_bullet(const game_state_t *state, const bullet_t *bullet);
 
+/* Powerup */
+void draw_powerup(const game_state_t *state, const powerup_t *powerup);
+
 /* Players */
 void draw_player(const game_state_t *state, const player_t *player);
 

@@ -5,9 +5,21 @@
 #include "player.h"
 #include "box.h"
 #include "bullet.h"
+#include "powerup.h"
 
-#define BOX_TIMER 1.0f
+#define BOX_SPAWN_TIMER 1.0f
 #define BOX_COUNT_MAX 50
+
+#define POWERUP_SPAWN_TIME_DEFAULT 12
+#define POWERUP_SPAWN_TIME_VARIANCE 5
+
+#define POWERUP_COUNT_MAX 10
+
+#define BOX_SPEED_DEFAULT 50
+#define BOX_SPEED_INCREASE 100
+#define BOX_SPEED_VARIANCE_DEFAULT 10
+#define BOX_SPEED_VARIANCE_INCREASE 40
+
 #define BULLET_COUNT_MAX 100
 
 #define MAX_DIFFICULTY_TIME 120.0f
@@ -23,18 +35,24 @@ typedef struct game_state {
 
 	box_t *boxes;
 	bullet_t *bullets;
+	powerup_t *powerups;
 
 	int boxes_count;
 	int bullets_count;
+	int powerups_count;
 	int player_count;
 	int frames_count;
 	int fps;
+
+	float difficulty; /* increases with time */
 
 	/* Scene & Game Timers */
 	float time;
 	float timer_frame;
 	float timer_box;
 	float timer_game;
+	float timer_powerup;
+	float powerup_wait; /* time before next power-up spawns */
 
 	/* IO */
 	int p1_left_down;

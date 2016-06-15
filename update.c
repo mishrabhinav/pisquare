@@ -46,7 +46,10 @@ void regenerate_box(game_state_t *state, box_t *box)
 	int up = random_int(2);
 	int forward = random_int(2);
 	int sign = 2 * forward - 1;
-	float vel = sign * (random_int(50) + 10);
+	float vel = sign * (random_int(BOX_SPEED_VARIANCE_DEFAULT
+			+ state->difficulty * BOX_SPEED_VARIANCE_INCREASE)
+			+ BOX_SPEED_DEFAULT
+			+ state->difficulty * BOX_SPEED_INCREASE);
 
 	int randy = random_int(state->area.y - box->entity->size.y);
 	int randx = random_int(state->area.x - box->entity->size.x);
@@ -85,19 +88,16 @@ void update_player(game_state_t *state, player_t *player)
 	player->debounce_time += state->delta;
 
 	player_rotate(player, player->angular_vel * state->delta);
+	vector2_t dir = player_direction_vector(player);
 
-	player->entity->vel.x = player->speed * cos(M_PI * player->dir/180.f);
-	player->entity->vel.y = player->speed * sin(M_PI * player->dir/180.f);
+	player->entity->vel.x = player->speed * dir.x;
+	player->entity->vel.y = player->speed * dir.y;
 
 	update_entity(state, player->entity);
 
 	/* Speed Increase */
-	if (state->time > MAX_DIFFICULTY_TIME)
-		player->speed = PLAYER_SPEED_INCREASE;
-	else
-		player->speed = PLAYER_DEFAULT_SPEED
-			+ PLAYER_SPEED_INCREASE
-			* state->time / MAX_DIFFICULTY_TIME;
+	player->speed = PLAYER_SPEED_DEFAULT
+				+ state->difficulty * PLAYER_SPEED_INCREASE;
 
 	/* Boundaries */
 	if (player->entity->pos.x <= 0) { /* left wall */
