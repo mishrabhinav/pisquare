@@ -11,10 +11,11 @@ static volatile dma_conblk_t *dma_blocks;
 static volatile uint32_t *dma_enable = (void *)(DMA_BASE + DMA_ENABLE_OFFSET);
 
 static uint32_t dma_usable;
+static uint32_t dma_reserved;
 
 static uint32_t zero;
 
-static volatile dma_register_t *get_channel(int channel)
+static volatile dma_register_t *get_dma_channel(int channel)
 {
 	return (void *)(DMA_BASE + DMA_OFFSET * (uintptr_t)channel);
 }
@@ -32,9 +33,11 @@ int dma_init(void)
 	RPI_PropertyAddTag(TAG_GET_DMA_CHANNELS);
 	RPI_PropertyProcess();
 
-	mp = RPI_PropertyGet(TAG_GET_PHYSICAL_SIZE);
+	mp = RPI_PropertyGet(TAG_GET_DMA_CHANNELS);
 	if (mp)
 		dma_usable = mp->data.buffer_32[0];
+
+	dma_reserved = 0;
 
 	dma_blocks_mem = malloc(sizeof(dma_conblk_t) * (DMA_CHANNELS + 1));
 	if (!dma_blocks_mem)
@@ -46,14 +49,16 @@ int dma_init(void)
 	return 0;
 }
 
-int dma_check_active(int ch)
+static int dma_check_channel(int ch)
 {
-	return (get_channel(ch)->cs & DMA_CS_ACTIVE);
-}
+	int ret;
 
-int dma_check_usable(int ch)
-{
-	return dma_usable & (1 << ch);
+	ret = 1;
+	ret = ret && !(get_dma_channel(ch)->cs & DMA_CS_ACTIVE);
+	ret = ret && (dma_usable & (1 << ch));
+	ret = ret && !(dma_reserved & (1 << ch));
+
+	return  ret;
 }
 
 static int dma(void *dst, const void *src, size_t len, uint32_t ti)
@@ -62,7 +67,7 @@ static int dma(void *dst, const void *src, size_t len, uint32_t ti)
 	volatile dma_register_t *dma_reg;
 
 	for (i = 0; i < DMA_CHANNELS; i++) {
-		if (!dma_check_usable(i) && dma_check_active(i))
+		if (!dma_check_channel(i))
 			continue;
 		dma_blocks[i].ti = ti;
 		dma_blocks[i].source_ad = (uintptr_t)src;
@@ -70,14 +75,14 @@ static int dma(void *dst, const void *src, size_t len, uint32_t ti)
 		dma_blocks[i].txfr_len = len;
 		dma_blocks[i].stride = 0;
 		dma_blocks[i].nextconbk = 0;
-		dma_reg = get_channel(i);
+		dma_reg = get_dma_channel(i);
 		dma_reg->conblk_ad = (uintptr_t)(void *)&dma_blocks[i];
 		dma_reg->cs |= DMA_CS_ACTIVE;
 
 		while (dma_reg->cs & DMA_CS_ACTIVE)
 			;
 
-		return i;
+		return 0;
 	}
 
 	return -1;
@@ -96,4 +101,30 @@ int dma_fill(void *dst, const void *src, size_t len)
 int dma_zero(void *dst, size_t len)
 {
 	return dma_fill(dst, &zero, len);
+}
+
+volatile dma_register_t *dma_reserve_channel(void)
+{
+	int i;
+
+	for (i = 0; i < DMA_CHANNELS; i++) {
+		if (!dma_check_channel(i))
+			continue;
+		dma_reserved |= 1 << i;
+		return get_dma_channel(i);
+	}
+
+	return NULL;
+}
+
+void dma_free_channel(volatile dma_register_t *channel)
+{
+	int i;
+
+	for (i = 0; i < DMA_CHANNELS; i++) {
+		if (get_dma_channel(i) == channel) {
+			dma_reserved &= ~(uint32_t)(1 << i);
+			break;
+		}
+	}
 }
