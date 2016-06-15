@@ -15,8 +15,20 @@ powerup_t *powerup_new(powerup_t *powerup)
 }
 static inline float powerup_duration(int type)
 {
-	(void)type;
-	return 0;
+	switch (type) {
+	case POWERUP_TYPE_BULLETS:
+		return POWERUP_BULLETS_DURATION;
+	case POWERUP_TYPE_LIFE:
+		return POWERUP_LIFE_DURATION;
+	case POWERUP_TYPE_SHIELD:
+		return POWERUP_SHIELD_DURATION;
+	case POWERUP_TYPE_TINY:
+		return POWERUP_TINY_DURATION;
+	case POWERUP_TYPE_INVINCIBLE:
+		return POWERUP_INVINCIBLE_DURATION;
+	default:
+		return 0;
+	}
 }
 
 void powerup_set_kind(powerup_t *powerup, int type)

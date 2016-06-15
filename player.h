@@ -53,7 +53,7 @@ typedef struct {
 	float powerup_duration;
 
 	/* Flags */
-	int normal;
+	int normal; /* can be damaged */
 	int shoot; /* flag to shoot */
 	int powered; /* flag for powerups */
 	int powerup_type;

@@ -123,6 +123,13 @@ void update_player(game_state_t *state, player_t *player)
 	player->dir = 180
 		* atan2(player->entity->vel.y, player->entity->vel.x)/M_PI;
 
+	/* Powerups */
+
+	/* State Update */
+	player->normal = player->debounce_time > PLAYER_DEBOUNCE_TIME
+		&& !(player->powered
+			&& player->powerup_type == POWERUP_TYPE_INVINCIBLE);
+
 	/* IO */
 	int right = !RPI_GetGpioValue(player->right_pin);
 	int left = !RPI_GetGpioValue(player->left_pin);

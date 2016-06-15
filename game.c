@@ -225,9 +225,7 @@ int game_update(game_state_t *state)
 	/* Collision Detection */
 	/* Players with boxes, powerups */
 	for (int j = 0; j < state->player_count; j++) {
-		if (state->player[j].lives > 0
-				&& state->player[j].debounce_time
-						> PLAYER_DEBOUNCE_TIME) {
+		if (state->player[j].lives > 0 && state->player[j].normal) {
 			/* Boxes */
 			for (int i = 0; i < state->boxes_count; i++) {
 				if (collides(state->player[j].entity,
@@ -253,8 +251,7 @@ int game_update(game_state_t *state)
 			/* Players */
 			for (int j = 0; j < state->player_count; j++) {
 				if (state->player[j].lives > 0
-					&& state->player[j].debounce_time
-					> PLAYER_DEBOUNCE_TIME
+					&& state->player[j].normal
 					&& collides(state->player[j].entity,
 						state->bullets[i].entity)) {
 					player_injure(&state->player[j]);
