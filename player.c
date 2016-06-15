@@ -94,7 +94,7 @@ void player_powerup(player_t *player, powerup_t *powerup)
 		break;
 	case POWERUP_TYPE_LIFE:
 		player->lives = player->lives == PLAYER_LIVES_MAX
-					? PLAYER_LIVES_MAX : player->lives + 1;
+			? PLAYER_LIVES_MAX : player->lives + 1;
 		break;
 	case POWERUP_TYPE_SHIELD:
 		player->powerup_shield = 1;

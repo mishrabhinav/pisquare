@@ -113,23 +113,23 @@ static void print_fps(game_state_t *state)
 void game_init(game_state_t *state)
 {
 	RPI_InitRandom();
-	/* game area */
+	/* Game Area */
 	state->area = (vector2_t){state->device->width,
 				  state->device->height - 32};
 
-	/* boxes */
+	/* Boxes */
 	state->boxes_count = 0;
 
-	/* bullets */
+	/* Bullets */
 	state->bullets_count = 0;
 	state->bullets = malloc(BULLET_COUNT_MAX * sizeof(bullet_t));
 
-	/* powerups */
+	/* Powerups */
 	state->powerups_count = 0;
 	state->powerups = malloc(POWERUP_COUNT_MAX * sizeof(powerup_t));
 	state->powerup_wait = POWERUP_SPAWN_TIME_DEFAULT;
 
-	/* player */
+	/* Player */
 	for (int i = 0; i < state->player_count; i++) {
 		player_t *player = player_new(i + 1, state->player_count);
 		vector2_t dir = player_direction_vector(player);
@@ -153,7 +153,7 @@ void game_init(game_state_t *state)
 		state->player[i] = *player;
 	}
 
-	/* timers */
+	/* Timers */
 	state->timer_box = 0;
 	state->timer_game = 0;
 	state->timer_frame = 0;
@@ -168,26 +168,26 @@ int game_update(game_state_t *state)
 	state->timer_frame += state->delta;
 	state->timer_powerup += state->delta;
 
-	/* Difficulty */
+	/* Difficulty Scaling */
 	if (state->timer_game >= MAX_DIFFICULTY_TIME)
 		state->difficulty = 1.f;
 	else
 		state->difficulty = state->timer_game/MAX_DIFFICULTY_TIME;
 
-	/* Diagnostics */
+	/* Frame Rate Measurement */
 	if (state->timer_frame >= 1.f) {
 		state->fps = state->frames_count;
 		state->frames_count = 0;
 		state->timer_frame = 0;
 	}
 
-	/* Boxes */
 	/* Increase number of boxes over time */
 	if (state->timer_box > BOX_SPAWN_TIMER
 				&& state->boxes_count < BOX_COUNT_MAX) {
 		state->timer_box = 0;
 		add_box(state);
 	}
+
 	/* Update Boxes */
 	for (int i = 0; i < state->boxes_count; i++)
 		update_box(state, &state->boxes[i]);
@@ -202,10 +202,13 @@ int game_update(game_state_t *state)
 		state->timer_powerup = 0;
 		state->powerup_wait = POWERUP_SPAWN_TIME_DEFAULT
 			+ random_int(POWERUP_SPAWN_TIME_VARIANCE);
+		/* Instantiate New Powerup */
 		if (state->powerups_count < POWERUP_COUNT_MAX) {
 			powerup_t *powerup = add_powerup(state);
-			/* Position */
+
 			powerup->free = 0;
+
+			/* Position */
 			powerup->entity->pos = (vector2_t){
 			random_int(state->area.x - powerup->entity->size.x),
 			random_int(state->area.y - powerup->entity->size.y)};
@@ -215,41 +218,43 @@ int game_update(game_state_t *state)
 	/* Players */
 	for (int i = 0; i < state->player_count; i++) {
 		if (state->player[i].lives > 0) {
+			/* Update */
 			update_player(state, &state->player[i]);
+
+			/* Shooting */
 			if (state->player[i].shoot) {
 				player_shoot(&state->player[i],
 							add_bullet(state));
 			}
-		}
-	}
 
-	/* Collision Detection */
-	/* Players with boxes, powerups */
-	for (int j = 0; j < state->player_count; j++) {
-		if (state->player[j].lives > 0 && state->player[j].normal) {
-			/* Boxes */
-			for (int i = 0; i < state->boxes_count; i++) {
-				if (collides(state->player[j].entity,
-						state->boxes[i].entity)) {
-					regenerate_box(state, &state->boxes[i]);
-					player_injure(&state->player[j]);
-				}
-			}
-
-			/* Powerups */
-			for (int i = 0; i < state->powerups_count; i++) {
-				if (collides(state->player[j].entity,
-						state->powerups[i].entity)) {
-					player_powerup(&state->player[j],
-							&state->powerups[i]);
+			/* Box collisions */
+			for (int j = 0; j < state->boxes_count; j++) {
+				if (state->player[i].normal &&
+					collides(state->player[i].entity,
+						state->boxes[j].entity)) {
+					regenerate_box(state, &state->boxes[j]);
+					player_injure(&state->player[i]);
 				}
 			}
 		}
+		/* Powerup Collisons */
+		for (int j = 0; j < state->powerups_count; j++) {
+			if (!state->powerups[j].free
+					&& collides(state->player[i].entity,
+					state->powerups[j].entity)) {
+				player_powerup(&state->player[i],
+						&state->powerups[j]);
+			}
+		}
 	}
-	/* Bullets with Players/Boxes */
+
+	/* Bullets */
 	for (int i = 0; i < state->bullets_count; i++) {
 		if (!state->bullets[i].dead) {
-			/* Players */
+			/* Update */
+			update_bullet(state, &state->bullets[i]);
+
+			/* Player Collisions */
 			for (int j = 0; j < state->player_count; j++) {
 				if (state->player[j].lives > 0
 					&& state->player[j].normal
@@ -260,7 +265,7 @@ int game_update(game_state_t *state)
 				}
 			}
 
-			/* Boxes */
+			/* Box Colisions */
 			for (int j = 0; j < state->boxes_count; j++) {
 				if (collides(state->boxes[j].entity,
 						state->bullets[i].entity)) {
